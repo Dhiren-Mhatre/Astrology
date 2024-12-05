@@ -38,7 +38,7 @@ const Banner = () => {
   }, []);
 
   return (
-    <div className="w-full p-4 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] my-2">
+    <div className="w-full p-4 h-[120px] sm:h-[200px] md:h-[300px] lg:h-[440px] my-2">
       <Slider {...settings}>
         {banners?.map((banner) => (
           <div className="relative w-full h-full" key={banner._id}>
