@@ -232,7 +232,7 @@ const TopAstrologer = () => {
   return (
    <div className="w-full my-8 p-5">
   <div className="flex items-center justify-between mb-4">
-    <h2 className="text-2xl font-bold">Expert Astrologers</h2>
+    <h2 className="text-3xl font-bold">Expert Astrologers</h2>
     <button
       onClick={() => navigate("/astrology-consultation")}
       className="bg-green-500 text-white py-2 px-4 rounded"

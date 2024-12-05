@@ -32,7 +32,7 @@ const TopCategories = () => {
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
       <div className="container ml-5 py-8">
-        <h2 className="text-2xl font-bold text-center mb-4">
+        <h2 className="text-3xl font-bold text-center mb-6">
           Shop Our Collections
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">

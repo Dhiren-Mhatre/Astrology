@@ -141,7 +141,7 @@ const BirthDetailsPopup = ({ userDetails, handleInputChange, handleSubmit, onClo
         
       } else {
         console.error("Error fetching city suggestions:", error);
-        toast.error("Unable to fetch city suggestions");
+         
       }
     } finally {
       setIsLoading(false);

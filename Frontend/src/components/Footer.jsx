@@ -40,7 +40,7 @@ const Footer = () => {
               placeholder="Your Email Address"
               className="px-4 py-2 border border-gray-300 rounded"
             />
-            <button className="ml-2 px-4 py-2 bg-red-600 text-white rounded">
+            <button className="ml-2 mt-3 px-4 py-2 bg-red-600 text-white rounded">
               Subscribe
             </button>
           </div>
