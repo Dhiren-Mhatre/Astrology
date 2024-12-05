@@ -1,9 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
 const backendUrl = import.meta.env.VITE_BACKENDURL;
+
 const TopCategories = () => {
   const [categories, setCategories] = useState([]);
+
   const handleCategoryClick = (categoryName) => {
     const formattedCategoryName = categoryName
       .toLowerCase()
@@ -14,45 +17,46 @@ const TopCategories = () => {
 
   const getCategories = async () => {
     try {
-      const response = await axios.get(` ${backendUrl}/api/categories/`);
-      // console.log(response);
-
+      const response = await axios.get(`${backendUrl}/api/categories/`);
       const data = await response.data;
       setCategories(data);
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getCategories();
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        Top Categories
+    <div className="container ml-5  py-8 ">
+      <h2 className="text-xl font-bold text-left mb-4">
+        Shop Our Collections
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
         {categories?.map((category, index) =>
-          index >= 9 ? (
+          index >= 13 ? (
             <div
               key={index}
-              className="flex flex-col md:flex-row items-center justify-center md:justify-around bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-300"
+              className="flex flex-col items-center cursor-pointer"
               onClick={() => handleCategoryClick(category.name)}
             >
-              <img
-                src={category.imgLink}
-                alt={category.name}
-                className="w-16 h-16 object-cover mb-2"
-              />
-              <h3 className="text-center text-sm font-medium">
+              <div className=" bg-gray-200 rounded-full overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src={category.imgLink}
+                  alt={category.name}
+                  className="w-40 h-40 object-cover"
+                />
+              </div>
+              <h3 className="mt-2 text-l font-medium text-center">
                 {category.name}
               </h3>
             </div>
           ) : null
         )}
       </div>
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <Link
           className="px-6 py-2 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600 transition duration-300"
           to={"/all-categories"}

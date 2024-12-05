@@ -4,7 +4,8 @@ import axios from "axios";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useNavigate } from "react-router-dom";
+import CallComponent from "../components/Call"; // Updated import to CallComponent
 const backendUrl = import.meta.env.VITE_BACKENDURL;
 
 const TopAstrologer = () => {
@@ -19,6 +20,11 @@ const TopAstrologer = () => {
   const isUserLoggedIn = () => {
     // Replace with actual login check logic
     return localStorage.getItem("authToken") !== null;
+  };
+  const navigate = useNavigate();
+
+  const handleViewProfile = (astrologerId) => {
+    navigate(`/about-astrologer/${astrologerId}`);
   };
 
   // Update userDetails state and persist data if user logs in again
@@ -39,6 +45,7 @@ const TopAstrologer = () => {
 
       if (response.status === 200) {
         setUserDetails(response.data); // Assume response.data contains user details
+        console.log(userDetails);
         localStorage.setItem("userDetails", JSON.stringify(response.data));
       } else {
         toast.error("Failed to fetch user details.");
@@ -171,104 +178,112 @@ const TopAstrologer = () => {
     handleSubmit(); // Call handleSubmit first
     handleCallClick(astrologerId); // Then call handleCallClick with the astrologer ID
   };
-
   const handleCallClick = async (astrologerId) => {
-    const supportPhoneNumber = "+918800774985"; // Update number as needed
-
-    if (isUserLoggedIn()) {
-      const requiredFields = ["gender", "dateOfBirth", "timeOfBirth", "birthPlace"];
-      const isUserDetailsComplete = requiredFields.every((field) => userDetails[field]);
-
-      if (!isUserDetailsComplete) {
-        setIsPopupOpen(true);
-      } else {
-        const authToken = localStorage.getItem("authToken");
-        const userId = localStorage.getItem("userId");
-
-        if (!userId || !astrologerId) {
-          toast.error("User or astrologer ID missing.");
-          return;
-        }
-
-        const callDetails = {
-          user_id: userId,
-          astrologer_id: astrologerId,
-          date_of_call: new Date().toISOString(),
-          call_duration: 0,
-          flag_free_paid_call: "free",
-        };
-
-        try {
-          await axios.post(`${backendUrl}/api/calls`, callDetails, {
-            headers: { Authorization: `Bearer ${authToken}` },
-          });
-
-          // Open the dialer for the call
-          window.location.href = `tel:${supportPhoneNumber}`;
-        } catch (error) {
-          console.error("Error logging the call:", error);
-          toast.error("Error logging the call.");
-        }
-      }
-    } else {
+    const requiredFields = ["gender", "dateOfBirth", "timeOfBirth", "birthPlace"];
+    const isUserDetailsComplete = requiredFields.every((field) => userDetails[field]);
+  
+    if (!isUserDetailsComplete) {
+      setIsPopupOpen(true);
+      toast.warning("Please complete your birth details before placing a call.");
+      return; // Stop further execution
+    }
+  
+    if (!isUserLoggedIn()) {
       toast.warning("Please log in to place a call.");
+      return; // Stop execution if user is not logged in
+    }
+  
+    const authToken = localStorage.getItem("authToken");
+    const userId = localStorage.getItem("userId");
+  
+    if (!userId || !astrologerId) {
+      toast.error("User or astrologer ID missing.");
+      return; // Stop execution if IDs are missing
+    }
+  
+    const callDetails = {
+      user_id: userId,
+      astrologer_id: astrologerId,
+      date_of_call: new Date().toISOString(),
+      call_duration: 0,
+      flag_free_paid_call: "free",
+    };
+  
+    try {
+      await axios.post(`${backendUrl}/api/calls`, callDetails, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+  
+      // Open the dialer for the call
+      const supportPhoneNumber = "+918800774985"; // Update number as needed
+      window.location.href = `tel:${supportPhoneNumber}`;
+    } catch (error) {
+      console.error("Error logging the call:", error);
+      toast.error("Error logging the call.");
     }
   };
+  
+  
 
   const isUserDetailsComplete = Object.values(userDetails).every(
     (detail) => detail !== ""
   );
 
   return (
-    <div className="w-full my-8 p-5">
-      <div className="m-auto">
-        <h2 className="text-xl font-bold mb-4">Expert Astrologers</h2>
-      </div>
-      <ToastContainer />
-      {isPopupOpen && (
-        <Popup userDetails={userDetails} handleInputChange={handleInputChange} handleSubmit={handleSubmit} />
-      )}
-      {astrologers.length > 0 ? (
-        <Slider {...settings}>
-          {astrologers.map((astrologer) => (
-            <div key={astrologer._id} className="pz-4">
-              <div className="border rounded-lg p-4 text-center shadow-md">
-                <img
-                  src={astrologer.imgLink}
-                  alt={astrologer.name}
-                  className="w-32 h-32 rounded-full mx-auto object-cover"
-                />
-                <h3 className="text-lg font-semibold mt-4">
-                  {astrologer.name}
-                </h3>
-                <div className="flex items-center justify-center mt-2">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <span key={index}>
-                      {index < astrologer.rating ? "★" : "☆"}
-                    </span>
-                  ))}
-                  <span className="ml-2">({astrologer.rating})</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  {astrologer.experience} years of experience
-                </p>
-                <button className="mt-4 bg-green-500 text-white py-2 px-4 rounded">
-                  View Profile
-                </button>
-                <button
-                  onClick={() => handleCallClick(astrologer._id)} // Pass astrologer._id
-                  className="mt-4 ml-2 bg-blue-500 text-white py-2 px-4 rounded"
-                >
-                  Call
-                </button>
-              </div>
+   <div className="w-full my-8 p-5">
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-xl font-bold">Expert Astrologers</h2>
+    <button
+      onClick={() => navigate("/astrology-consultation")}
+      className="bg-green-500 text-white py-2 px-4 rounded"
+    >
+      View all Astrologer
+    </button>
+  </div>
+  <ToastContainer />
+  {isPopupOpen && (
+    <Popup userDetails={userDetails} handleInputChange={handleInputChange} handleSubmit={handleSubmit} />
+  )}
+  {astrologers.length > 0 ? (
+    <Slider {...settings}>
+      {astrologers.map((astrologer) => (
+        <div key={astrologer._id} className="pz-4">
+          <div className="border rounded-lg p-4 text-center shadow-md">
+            <img
+              src={astrologer.imgLink}
+              alt={astrologer.name}
+              className="w-32 h-32 rounded-full mx-auto object-cover"
+            />
+            <h3 className="text-lg font-semibold mt-4">
+              {astrologer.name}
+            </h3>
+            <div className="flex items-center justify-center mt-2">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <span key={index}>
+                  {index < astrologer.rating ? "★" : "☆"}
+                </span>
+              ))}
+              <span className="ml-2">({astrologer.rating})</span>
             </div>
-          ))}
-        </Slider>
-      ) : (
-        <p>Loading astrologers...</p>
-      )}
-    </div>
+            <p className="text-sm text-gray-500 mt-2">
+              {astrologer.experience} years of experience
+            </p>
+            <button
+              onClick={() => handleViewProfile(astrologer._id)}
+              className="mt-4 align-left mr-3 bg-green-500 text-white py-2 px-4 rounded"
+            >
+              View Profile
+            </button>
+            <CallComponent astrologerId={astrologer._id} backendUrl={backendUrl} />
+          </div>
+        </div>
+      ))}
+    </Slider>
+  ) : (
+    <p>Loading astrologers...</p>
+  )}
+</div>
+
   );
 };
 const Popup = ({ userDetails, handleInputChange, handleSubmit }) => (
@@ -282,15 +297,61 @@ const Popup = ({ userDetails, handleInputChange, handleSubmit }) => (
       textAlign: "center", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
     }}>
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "20px" }}>
-        <input type="text" name="gender" placeholder="Gender" value={userDetails.gender} onChange={handleInputChange} />
-        <input type="date" name="dateOfBirth" placeholder="Date of Birth" value={userDetails.dateOfBirth} onChange={handleInputChange} />
-        <input type="time" name="timeOfBirth" placeholder="Time of Birth" value={userDetails.timeOfBirth} onChange={handleInputChange} />
-        <input type="text" name="birthPlace" placeholder="Birth Place" value={userDetails.birthPlace} onChange={handleInputChange} />
-        <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">Save & Continue</button>
+        
+        <label style={{ textAlign: "left" }}>
+          Gender:
+          <input
+            type="text"
+            name="gender"
+            placeholder="Gender"
+            value={userDetails.gender}
+            onChange={handleInputChange}
+            style={{ marginTop: "5px", padding: "8px", width: "100%" }}
+          />
+        </label>
+
+        <label style={{ textAlign: "left" }}>
+          Date of Birth in dd/mm/yyyy:
+          <input
+            type="date"
+            name="dateOfBirth"
+            value={userDetails.dateOfBirth}
+            onChange={handleInputChange}
+            style={{ marginTop: "5px", padding: "8px", width: "100%" }}
+          />
+        </label>
+
+        <label style={{ textAlign: "left" }}>
+          Time of Birth:
+          <input
+            type="time"
+            name="timeOfBirth"
+            value={userDetails.timeOfBirth}
+            onChange={handleInputChange}
+            style={{ marginTop: "5px", padding: "8px", width: "100%" }}
+          />
+        </label>
+
+        <label style={{ textAlign: "left" }}>
+          Birth Place:
+          <input
+            type="text"
+            name="birthPlace"
+            placeholder="Birth Place"
+            value={userDetails.birthPlace}
+            onChange={handleInputChange}
+            style={{ marginTop: "5px", padding: "8px", width: "100%" }}
+          />
+        </label>
+
+        <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">
+          Save 
+        </button>
       </form>
     </div>
   </div>
 );
+
 const inputStyle = {
   padding: "10px",
   borderRadius: "5px",

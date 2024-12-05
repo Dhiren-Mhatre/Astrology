@@ -31,14 +31,16 @@ const Login = () => {
   
         window.dispatchEvent(new Event("storage")); // Trigger event
   
-        toast.success("Login successful");
+       
         navigate("/");
       } catch (err) {
         console.log(err);
-        toast.error(err.message);
+        if(err.response.status===400){
+          alert("incorrect password");
+        }
       }
     } else {
-      toast.error("Please fill all inputs");
+      alert("Please fill all inputs");
     }
   };
   

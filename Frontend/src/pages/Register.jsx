@@ -31,16 +31,16 @@ const Register = () => {
             `${backendUrl}/api/user/register`,
             formData
           );
-          toast.success("Registration successful");
+          alert("Registration successful");
           navigate("/login");
         } catch (err) {
-          toast.error(err.response?.data?.error || "Registration failed");
+         alert(err.response?.data?.error || "Registration failed");
         }
       } else {
-        toast.error("Passwords don't match");
+        alert("Passwords don't match");
       }
     } else {
-      toast.error("Please fill all inputs");
+      alert("Please fill all inputs");
     }
   };
 
@@ -78,7 +78,8 @@ const Register = () => {
               onChange={(phone) => setPhone(phone)}
               inputStyle={{
                 width: "100%",
-                padding: "10px",
+                padding: "20px",
+                paddingLeft: "40px",
                 border: "1px solid #ccc",
                 borderRadius: "4px",
               }}
