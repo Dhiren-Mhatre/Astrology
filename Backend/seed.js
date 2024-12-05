@@ -332,13 +332,7 @@ const categories = [
     shopifyPage: "https://n21fga-ce.myshopify.com/",
     description: "Special products for the Diwali festival.",
   },
-  {
-    name: "Daily Puja Needs",
-    img: "https://mangalbhawan.com/public/uploads/all/fe4rKUdbK5DO1ZGkimGp77yuthfMpukqDtPsP2Lb.png",
-    shopifyId: "1013",
-    shopifyPage: "https://n21fga-ce.myshopify.com/",
-    description: "Everyday items needed for puja.",
-  },
+ 
   {
     name: "Hawan Samagri",
     img: "https://mangalbhawan.com/public/uploads/all/JVz8IAvDm8pK5dj4dDAD4KUJT5ao49lsiVw6GU3M.png",
@@ -346,15 +340,43 @@ const categories = [
     shopifyPage: "https://n21fga-ce.myshopify.com/",
     description: "Materials for conducting hawan rituals.",
   },
+   
+  {
+    name: "Gemstones",
+    img: "https://res.cloudinary.com/dguy5exjy/image/upload/v1732622013/your-cloudinary-folder-name/z37laegcyfighiuc6bjv.jpg",
+    shopifyId: "1016",
+    shopifyPage: "https://n21fga-ce.myshopify.com/",
+    description: "Authentic gemstones to bring balance and harmony.",
+  },
+  {
+    name: "Idols",
+    img: "https://res.cloudinary.com/dguy5exjy/image/upload/v1732620725/your-cloudinary-folder-name/tds7j7071o2omf9c0dez.jpg",
+    shopifyId: "1017",
+    shopifyPage: "https://n21fga-ce.myshopify.com/",
+    description: "Beautiful idols for worship and decoration.",
+  },
+  {
+    name: "Puja Samagri",
+    img: "https://res.cloudinary.com/dguy5exjy/image/upload/v1732620735/your-cloudinary-folder-name/rcurk3wsdnlvdukuabdl.png",
+    shopifyId: "1018",
+    shopifyPage: "https://n21fga-ce.myshopify.com/",
+    description: "Comprehensive items for your puja needs.",
+  },
   {
     name: "Pujas",
-    img: "https://mangalbhawan.com/public/uploads/all/DLYJ94SqUQx5kSXLOke3EEtNnYzSJz1bzUp4N5DE.png",
-    shopifyId: "1015",
+    img: "https://res.cloudinary.com/dguy5exjy/image/upload/v1732622473/your-cloudinary-folder-name/t3q4frd3psb2tt14hq67.png",
+    shopifyId: "1019",
     shopifyPage: "https://n21fga-ce.myshopify.com/",
-    description: "Complete guide for performing various pujas.",
+    description: "Offerings and rituals for divine blessings.",
+  },
+  {
+    name: "Rudraksha",
+    img: "https://res.cloudinary.com/dguy5exjy/image/upload/v1732620741/your-cloudinary-folder-name/pkua8xd11scocdt5imxm.jpg",
+    shopifyId: "1020",
+    shopifyPage: "https://n21fga-ce.myshopify.com/",
+    description: "Sacred beads for spiritual well-being.",
   },
 ];
-
 // Function to seed categories
 export const seedCategories = async () => {
   try {

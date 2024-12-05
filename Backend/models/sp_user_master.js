@@ -34,22 +34,22 @@ const UserSchema = new mongoose.Schema(
     // Additional fields
     gender: {
       type: String,
-      enum: ['male', 'female', 'other'], // Ensure these are the allowed values
-       default: null,
+      enum: ['male', 'female', 'other'],
+     
     },
     dateOfBirth: {
       type: Date,
-      default: null,
+     
     },
     timeOfBirth: {
-      type: String, // Storing as a string (HH:mm format), change type if needed
-      default: null,
+      type: String,
+       
     },
     birthPlace: {
       type: String,
+       
       maxlength: 100,
-      default: null,
-    },
+    }
   },
   { 
     collection: "sp_user_master", 

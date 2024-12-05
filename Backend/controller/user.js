@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/sp_user_master.js"; // Ensure the correct path to your User model
 import dotenv from 'dotenv';
 dotenv.config();
-
+ 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -27,6 +27,7 @@ export const login = async (req, res) => {
 
       return res.status(200).json({ msg: "User logged in", token });
     } else {
+       
       return res.status(400).json({ msg: "Bad password" });
     }
   } else {
@@ -59,8 +60,12 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const register = async (req, res) => {
+  
   const { name, email, phoneNumber, password } = req.body;
-
+  if (!name || !email || !phoneNumber || !password) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+  console.log(req.body)
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -89,6 +94,12 @@ export const updateProfile = async (req, res) => {
   try {
     const { userId } = req.params; // Assumes user ID is passed in the URL
     const updateFields = req.body; // Capture all fields from the request body
+
+    // Example authorization check (assuming JWT-based authentication)
+    // const userFromToken = req.user; // Assuming the decoded user from the token is in req.user
+    // if (userFromToken.id !== userId) {
+    //   return res.status(403).json({ message: 'Not authorized to update this profile' });
+    // }
 
     // Update user profile with dynamic fields
     const updatedUser = await User.findByIdAndUpdate(
