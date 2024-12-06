@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -11,7 +11,7 @@ const Navbar = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken");  // Ensure to remove the correct key
+        localStorage.removeItem("authToken");
         setIsLoggedIn(false);
         navigate("/login");
     };
@@ -29,50 +29,78 @@ const Navbar = () => {
     }, []);
 
     return (
-        <nav className="bg-gray-800 p-4">
-            <div className="container mx-auto flex justify-between items-center">
-                <div className="text-white text-2xl font-bold">MyLogo</div>
+        <nav className="bg-white shadow-md">
+            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                {/* StarPandit Logo with Custom Styling */}
+                <div 
+                    className="text-3xl font-['Dancing_Script'] font-bold text-orange-400 hover:text-purple-800 transition-colors duration-300 cursor-pointer"
+                    onClick={() => navigate("/")}
+                >
+                    StarPandit
+                </div>
 
-                <div className="hidden md:flex space-x-6">
-                    <a href="/" className="text-white hover:text-gray-300">Home</a>
-                    <a href="#" className="text-white hover:text-gray-300">About</a>
-                    <a href="https://6aaccc-e0.myshopify.com/" className="text-white hover:text-gray-300">Shopify</a>
-                    <Link to="/astrology-consultation" className="text-white hover:text-gray-300">Astrology Consultation</Link>
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex space-x-6 items-center">
+                    <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors">Home</Link>
+                    <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors">About</Link>
+                    <Link to="/shopify" className="text-gray-700 hover:text-purple-600 transition-colors">Shopify</Link>
+                    <Link to="/consultation" className="text-gray-700 hover:text-purple-600 transition-colors">Astrology Consultation</Link>
+                    
                     {isLoggedIn ? (
-                        <button onClick={handleLogout} className="text-white hover:text-gray-300">Logout</button>
+                        <button 
+                            onClick={handleLogout} 
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                        >
+                            Logout
+                        </button>
                     ) : (
-                        <Link to="/login" className="text-white hover:text-gray-300">Login</Link>
+                        <Link 
+                            to="/login" 
+                            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition-colors"
+                        >
+                            Login
+                        </Link>
                     )}
                 </div>
 
+                {/* Mobile Menu Toggle */}
                 <div className="md:hidden">
-                    <button onClick={toggleMenu} className="text-white focus:outline-none">
-                        {isOpen ? (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        ) : (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                            </svg>
-                        )}
+                    <button 
+                        onClick={toggleMenu} 
+                        className="text-gray-700 hover:text-purple-600"
+                    >
+                        {isOpen ? '✕' : '☰'}
                     </button>
                 </div>
-            </div>
 
-            {isOpen && (
-                <div className="md:hidden">
-                    <a href="/" className="block px-4 py-2 text-white hover:bg-gray-700">Home</a>
-                    <a href="#" className="block px-4 py-2 text-white hover:bg-gray-700">About</a>
-                    <a href="https://6aaccc-e0.myshopify.com/" className="block px-4 py-2 text-white hover:bg-gray-700">Shopify</a>
-                    <Link to="/astrology-consultation" className="block px-4 py-2 text-white hover:bg-gray-700">Astrology Consultation</Link>
-                    {isLoggedIn ? (
-                        <button onClick={handleLogout} className="block w-full px-4 py-2 text-left text-white hover:bg-gray-700">Logout</button>
-                    ) : (
-                        <Link to="/login" className="block px-4 py-2 text-white hover:bg-gray-700">Login</Link>
-                    )}
-                </div>
-            )}
+                {/* Mobile Navigation Dropdown */}
+                {isOpen && (
+                    <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-md">
+                        <div className="flex flex-col items-center space-y-4 py-4">
+                            <Link to="/" className="text-gray-700 hover:text-purple-600">Home</Link>
+                            <Link to="/about" className="text-gray-700 hover:text-purple-600">About</Link>
+                            <Link to="/shopify" className="text-gray-700 hover:text-purple-600">Shopify</Link>
+                            <Link to="/consultation" className="text-gray-700 hover:text-purple-600">Astrology Consultation</Link>
+                            
+                            {isLoggedIn ? (
+                                <button 
+                                    onClick={handleLogout} 
+                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                >
+                                    Logout
+                                </button>
+                            ) : (
+                                <Link 
+                                    to="/login" 
+                                    className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+                                >
+                                    Login
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </nav>
     );
 };
