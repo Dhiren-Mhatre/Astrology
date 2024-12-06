@@ -33,7 +33,7 @@ const Navbar = () => {
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 {/* StarPandit Logo with Custom Styling */}
                 <div 
-                    className="text-3xl font-['Dancing_Script'] font-bold text-orange-400 hover:text-purple-800 transition-colors duration-300 cursor-pointer"
+                    className="text-5xl font-['Dancing_Script'] font-bold text-orange-400 hover:text-purple-800 transition-colors duration-300 cursor-pointer"
                     onClick={() => navigate("/")}
                 >
                     StarPandit
