@@ -10,6 +10,7 @@ const Home = () => {
   return (
     <>
       <Banner />
+      <TopCategories />
       <div className="container mx-auto p-4">
       {/* 16:9 Aspect Ratio (Default) */}
       <YouTubeMiniPlayer 
@@ -18,7 +19,6 @@ const Home = () => {
       />
  
     </div>
-      <TopCategories />
       <TopAstrologer />
     </>
   );

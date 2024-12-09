@@ -237,7 +237,7 @@ const TopAstrologer = () => {
       onClick={() => navigate("/astrology-consultation")}
       className="bg-green-500 text-white py-2 px-4 rounded"
     >
-      View all Astrologer
+      View all Astrologers
     </button>
   </div>
   <ToastContainer />

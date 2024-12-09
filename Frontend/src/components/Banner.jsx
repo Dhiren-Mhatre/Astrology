@@ -1,10 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 
 const backendUrl = import.meta.env.VITE_BACKENDURL;
 
 const Banner = () => {
+  const navigate = useNavigate(); // Add navigation hook
+
   const settings = {
     dots: true,
     infinite: true,
@@ -18,6 +21,23 @@ const Banner = () => {
   };
 
   const [banners, setBanners] = useState(null);
+
+  // Function to handle banner click and redirect
+  const handleBannerClick = (bannerName) => {
+    // Special handling for Astrology Consultation
+    if (bannerName.toLowerCase() === 'astrology-consultation') {
+      navigate('/astrology-consultation');
+      return;
+    }
+
+    // Convert banner name to Shopify collection slug
+    const formattedBannerName = bannerName
+      .toLowerCase()
+      .replace(/\s+/g, "-"); // Converts the banner name to a slug format
+    
+    const url = `https://6aaccc-e0.myshopify.com/collections/${formattedBannerName}`;
+    window.open(url, "_blank"); // Opens the URL in a new tab
+  };
 
   const getAllBanners = async () => {
     try {
@@ -41,15 +61,17 @@ const Banner = () => {
     <div className="w-full p-4 h-[120px] sm:h-[200px] md:h-[300px] lg:h-[440px] my-2">
       <Slider {...settings}>
         {banners?.map((banner) => (
-          <div className="relative w-full h-full" key={banner._id}>
-            <a href={`/${banner.name}`}>
-              <img
-                src={banner.imgLink}
-                alt={banner.name}
-                title={banner.name}
-                className="w-full h-full object-cover"
-              />
-            </a>
+          <div 
+            className="relative w-full h-full cursor-pointer" 
+            key={banner._id}
+            onClick={() => handleBannerClick(banner.name)}
+          >
+            <img
+              src={banner.imgLink}
+              alt={banner.name}
+              title={banner.name}
+              className="w-full h-full object-cover"
+            />
           </div>
         ))}
       </Slider>

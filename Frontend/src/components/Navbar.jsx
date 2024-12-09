@@ -44,7 +44,7 @@ const Navbar = () => {
                     <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors">Home</Link>
                     <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors">About</Link>
                     <Link to="/shopify" className="text-gray-700 hover:text-purple-600 transition-colors">Shopify</Link>
-                    <Link to="/consultation" className="text-gray-700 hover:text-purple-600 transition-colors">Astrology Consultation</Link>
+                    <Link to="/astrology-consultation" className="text-gray-700 hover:text-purple-600 transition-colors">Astrology Consultation</Link>
                     
                     {isLoggedIn ? (
                         <button 
@@ -80,7 +80,7 @@ const Navbar = () => {
                             <Link to="/" className="text-gray-700 hover:text-purple-600">Home</Link>
                             <Link to="/about" className="text-gray-700 hover:text-purple-600">About</Link>
                             <Link to="/shopify" className="text-gray-700 hover:text-purple-600">Shopify</Link>
-                            <Link to="/consultation" className="text-gray-700 hover:text-purple-600">Astrology Consultation</Link>
+                            <Link to="/astrology-consultation" className="text-gray-700 hover:text-purple-600">Astrology Consultation</Link>
                             
                             {isLoggedIn ? (
                                 <button 

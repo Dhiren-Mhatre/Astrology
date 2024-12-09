@@ -29,7 +29,7 @@ const YouTubeMiniPlayer = ({
 
   return (
     <div 
-      className={`relative w-full cursor-pointer ${aspectRatioClass}`}
+      className={`relative w-full cursor-pointer ${aspectRatioClass} h-auto md:h-[350px] lg:h-[500px] md:w-[750px] lg:w-[1500px]`}
       onClick={handlePlay}
     >
       {!isPlaying ? (
