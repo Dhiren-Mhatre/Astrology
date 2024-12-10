@@ -405,9 +405,9 @@ export const seedCategories = async () => {
 // seedAstrologers();
 const banners = [
   {
-    name: "ingredients",
+    name: "PanditParmanand",
     imgLink:
-      "https://mangalbhawan.com/public/uploads/all/HzuB0VwXGfdmoZqwVlpRb521nlFvPj6MPqSO8L6G.jpg",
+      "https://res.cloudinary.com/dguy5exjy/image/upload/t_first-banner/your-cloudinary-folder-name/kmdpam3frslvfj6imthb",
     active: true,
     sequenceNo: 1,
   },
