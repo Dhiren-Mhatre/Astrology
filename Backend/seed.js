@@ -94,14 +94,14 @@ const astrologers = [
     expertise: ["Vedic", "Vastu", "Marriage Matching", "Love Life"],
     language: ["Hindi", "English"],
     experience: 8,
-    minRate: 30, // Added hypothetical rate
-    discountedRate: 20, // Added hypothetical discounted rate
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Nitesh-Tripathi-.jpg", // Using a placeholder image
-    rating: 4.8, // Added hypothetical rating
-    ratingCount: 50, // Added hypothetical rating count
-    followers: 100, // Added hypothetical followers
+    minRate: 30, 
+    discountedRate: 20, 
+    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Nitesh-Tripathi-.jpg", 
+    rating: 4.8,
+    ratingCount: 50,
+    followers: 100,
     status: "online",
-    about: "Acharya Dhirendra Shastri is one of the best Vastu consultants in India. He has 8 years of rich experience in Kundli making, Vedic astrology, Matchmaking and Face reading. His advice on business, love and health help his clients. He loves to communicate and help the other person with communication, discussion, and guidance. The person surrounding him feels very positive about his communication and guidance. He loves to help people in their difficult and confusing times with knowledge and experience. He is a firm believer that every problem comes with a solution and knows what and who needs the right guidance at the right time. Apart from Vedic astrology he also provides remedies and pujas for Vastu dosha."
+    about: "Acharya Dhirendra Shastri is one of the best Vastu consultants in India. He has 8 years of rich experience in Kundli making, Vedic astrology, Matchmaking, and Face reading. His advice on business, love, and health helps his clients. He loves to communicate and help others through discussion and guidance. The people around him feel very positive due to his communication and guidance. He loves to help people during their difficult and confusing times with his knowledge and experience. He is a firm believer that every problem comes with a solution and knows who needs the right guidance at the right time. Apart from Vedic astrology, he also provides remedies and pujas for Vastu dosha."
   },
   {
     name: "Acharya Shivam",
@@ -115,7 +115,7 @@ const astrologers = [
     ratingCount: 80,
     followers: 150,
     status: "online",
-    about: "Acharya Shivam With more than a decade of experience, Acharya Shivam is a professional astrologer who gained experience in Vedic astrology along with other key dimensions Horoscope reading,marriage, Match Making ,Career, wealth and Love. Famous Astrologer located at Delhi NCR. He is providing qualitative range of astrology services to the people. Complete the atsrological education from Bhartiya Vidhya Bhawan from delhi. And Shastri From Sampurnanad University. Acharya Shivam strongly believes that God has chosen a path for everyone and all of us can find our way in life if we choose the right path. He also relies on the truth that people cannot cancel an event but balance in elements can give us strength and power to deal with a situation. He guides people with the help of his practice in Vedic Astrology to make life easy. So if you are looking for a spiritual healer then get connected to Acharya Shivam."
+    about: "Acharya Shivam, with more than a decade of experience, is a professional astrologer who gained expertise in Vedic astrology along with other key dimensions such as Horoscope reading, Marriage Matching, Career, Wealth, and Love. A famous astrologer located in Delhi NCR, he provides a qualitative range of astrology services to people. He completed his astrological education at Bhartiya Vidhya Bhawan in Delhi and received his Shastri degree from Sampurnanand University. Acharya Shivam strongly believes that God has chosen a path for everyone and that all of us can find our way in life if we choose the right path. He also believes that while people cannot prevent events, balancing elements can give them strength and power to deal with situations. He guides people using his practice in Vedic astrology to make life easier. So, if you are looking for a spiritual healer, get connected to Acharya Shivam."
   },
   {
     name: "Acharya Prakash",
@@ -129,7 +129,7 @@ const astrologers = [
     ratingCount: 40,
     followers: 75,
     status: "online",
-    about: "Acharya Prakash Acharya Prakash has been associated with this field for a pretty long time. He has been doing the same and helping people since ages for a very long time. His expertise and proficiency has helped people get past their life problems solved within no time. There are a lot of clients whom he has served and they are all leading happy and successful lives now. With whatever he has said and predicted, they went on to turn out to be pretty accurate. This explains the huge client base he enjoys in the current time. Today, he is counted amongst one of the premium astrologers in town. he hopes to keep serving people like this for the rest of her life and make it easier for everyone as he believes that everyone is capable of being saved and deserves to lead a good life."
+    about: "Acharya Prakash has been associated with this field for a long time. He has been helping people solve their life problems quickly and effectively. His expertise and proficiency have enabled many individuals to overcome challenges in their lives. Many of his clients are leading happy and successful lives thanks to his accurate predictions and guidance. This explains the large client base he enjoys. Today, he is counted among the premium astrologers in town. He hopes to continue serving people and making their lives easier as he believes everyone deserves to lead a good life."
   },
   {
     name: "Acharya Krishan Pandey",
@@ -143,7 +143,7 @@ const astrologers = [
     ratingCount: 30,
     followers: 50,
     status: "online",
-    about: "Acharya Krishan Pandey Acharya Krishan Pandeyis a highly experienced and knowledgeable astrologer with a focus on Vedic astrology. He has been practicing astrology for over half a decade and has helped countless individuals with his insightful and accurate predictions and guidance. Acharya Krishan Pandey passion for astrology began at a young age, and he has since dedicated his life to mastering the complexities of Vedic astrology. He has completed his formal education in astrology from a prestigious institution and has continued to expand his knowledge and expertise through ongoing study and practice. He deeply understands the planetary positions and their effects on different aspects of life, including career, finance, health, and relationships. So get in touch with Acharya Krishan Pandey sfor more information!"
+    about: "Acharya Krishan Pandey is a highly experienced and knowledgeable astrologer with a focus on Vedic astrology. He has been practicing astrology for over half a decade and has helped countless individuals with his insightful and accurate predictions. Acharya Krishan Pandey's passion for astrology began at a young age, and he has since dedicated his life to mastering the complexities of Vedic astrology. He has completed formal education in astrology from a prestigious institution and has continued expanding his knowledge through ongoing study and practice. He deeply understands planetary positions and their effects on different aspects of life, including career, finance, health, and relationships. Get in touch with Acharya Krishan Pandey for more information!"
   },
   {
     name: "Acharya Bhaskar",
@@ -157,7 +157,7 @@ const astrologers = [
     ratingCount: 25,
     followers: 60,
     status: "online",
-    about: "Acharya Bhaskar The knowledgeable astrologer Acharya Bhaskar has devoted more than a half-decade of his life to the study and practice of astrology. He holds the title of Vedic Astrology master as a result of his devotion. He provides his services at the finest caliber possible. His clientele has rapidly grown in a short period of time. Acharya Bhaskar clients appreciate his services since he can address any of their inquiries. His economical yet effective remedies have also received praise and confidence from his patients. Contact Acharya Bhaskar for assistance if you need it to get over challenging circumstances or challenges. He is the one who has promised to support and guide them."
+    about: "Acharya Bhaskar has devoted more than half a decade to the study and practice of astrology. His dedication has earned him the title of Vedic Astrology master. His services are of the finest caliber, and his clientele has grown significantly in a short period. Acharya Bhaskar's clients appreciate his ability to address their inquiries effectively. His affordable yet effective remedies have earned him praise and trust. Contact Acharya Bhaskar for assistance if you need help overcoming challenges. He is committed to supporting and guiding people."
   },
   {
     name: "Anupam Bharadwaj",
@@ -171,7 +171,7 @@ const astrologers = [
     ratingCount: 100,
     followers: 200,
     status: "online",
-    about: "Anupam Bharadwaj Acharya Anupam Bharadwaj is a highly respected and accomplished Vedic astrologer with over two decades of experience in the field. His extensive knowledge and expertise in Vedic astrology have helped thousands of people gain insights and guidance on various aspects of their lives, including career, relationships, health, and spirituality. He has an exceptional ability to analyze complex birth charts and interpret the positions of the planets to predict future events. Throughout his career, Acharya Anupam Bharadwaj has gained a reputation for his professionalism, integrity, and compassion. He takes a client-focused approach to his work and is known for his ability to connect with his clients on a personal level. Contact Acharya Anupam Bharadwaj for more information!"
+    about: "Acharya Anupam Bharadwaj is a highly respected and accomplished Vedic astrologer with over two decades of experience. His expertise in Vedic astrology has helped thousands gain insights and guidance on career, relationships, health, and spirituality. He has exceptional skills in analyzing birth charts and interpreting planetary positions. Acharya Anupam Bharadwaj is known for his professionalism, integrity, and compassion. He takes a client-focused approach and connects with clients personally. Contact Acharya Anupam Bharadwaj for more information!"
   },
   {
     name: "Acharya Rahul",
@@ -185,7 +185,7 @@ const astrologers = [
     ratingCount: 45,
     followers: 90,
     status: "online",
-    about: "Acharya Rahul Acharya Rahulis always ready to anyone in need and has a lot of knowledge in astrology, including Vedic astrology. Acharya Rahul is a very reputated astrologer.He has change many peoples life through their accurate predictions and remedies.He have great knowledge of astrology.His specialization in Shadi, Career, Job & Business, Love & arrange marrige, Health with a experience of 6 years. He honestly thinks that planetary motions are essential to assisting us in finding answers to problems. His precise assessments and practical recommendations have helped many of his clients achieve their objectives. In addition, he contends that even while humans cannot stop an event from happening, a set of circumstances might endow us with the strength and capability to handle it. Acharya Rahul mentors people using his knowledge of the subject in an effort to make their lives easier."
+    about: "Acharya Rahul is always ready to help anyone in need and possesses vast knowledge of astrology, including Vedic astrology. Acharya Rahul is a reputed astrologer who has changed many lives through accurate predictions and remedies. He specializes in marriage, career, job, health, and relationships. With 6 years of experience, his precise assessments and practical recommendations have helped many clients achieve their goals. He believes planetary motions are crucial in solving problems and provides guidance to make lives easier."
   }
 ];
 
