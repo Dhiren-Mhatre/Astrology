@@ -88,125 +88,105 @@ export const seedCollections = async () => {
     console.error("Error seeding data:", error);
   }
 }
-
 const astrologers = [
   {
-    name: "Tarot Jaya",
-    expertise: ["Tarot Reading"],
+    name: "Astrologer Dhirendra Shastri",
+    expertise: ["Vedic", "Vastu", "Marriage Matching", "Love Life"],
     language: ["Hindi", "English"],
-    experience: 6,
-    minRate: 30,
-    discountedRate: 20,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/IMG-20240810-WA0008.jpg",
-    rating: 5.0,
-    ratingCount: 1,
-    followers: 1,
+    experience: 8,
+    minRate: 30, // Added hypothetical rate
+    discountedRate: 20, // Added hypothetical discounted rate
+    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Nitesh-Tripathi-.jpg", // Using a placeholder image
+    rating: 4.8, // Added hypothetical rating
+    ratingCount: 50, // Added hypothetical rating count
+    followers: 100, // Added hypothetical followers
     status: "online",
-  },
-  {
-    name: "Acharya Nitesh",
-    expertise: ["Muhurat", "Marriage Matching"],
-    language: ["Hindi", "English"],
-    experience: 6,
-    minRate: 15,
-    discountedRate: 10,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Nitesh-Tripathi-.jpg",
-    rating: 5.0,
-    ratingCount: 30,
-    followers: 30,
-    status: "online",
-  },
-  {
-    name: "Acharya Palak",
-    expertise: ["Muhurat", "Face Reading", "Crystal Healing"],
-    language: ["Hindi"],
-    experience: 12,
-    minRate: 20,
-    discountedRate: 9,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Palaka.jpg",
-    rating: 4.9,
-    ratingCount: 94,
-    followers: 13,
-    status: "online",
-  },
-  {
-    name: "Acharya Satyam",
-    expertise: ["Muhurat", "Ravan Sahita", "Tajik"],
-    language: ["Punjabi", "Gujarati", "Hindi"],
-    experience: 10,
-    minRate: 20,
-    discountedRate: 11,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Satyam.jpg",
-    rating: 5.0,
-    ratingCount: 8,
-    followers: 20,
-    status: "online",
-  },
-  {
-    name: "Jothidar Arun",
-    expertise: ["Face Reading", "South Astrology"],
-    language: ["Tamil", "English"],
-    experience: 10,
-    minRate: 40,
-    discountedRate: 35,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Arun%20(1).jpg",
-    rating: 0.0,
-    ratingCount: 0,
-    followers: 0,
-    status: "online",
-  },
-  {
-    name: "Acharya Ashtha",
-    expertise: ["Vedic", "Vastu", "Ravan Sahita"],
-    language: ["Hindi"],
-    experience: 9,
-    minRate: 18,
-    discountedRate: 15,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Aastha.jpg",
-    rating: 5.0,
-    ratingCount: 380,
-    followers: 171,
-    status: "online",
+    about: "Acharya Dhirendra Shastri is one of the best Vastu consultants in India. He has 8 years of rich experience in Kundli making, Vedic astrology, Matchmaking and Face reading. His advice on business, love and health help his clients. He loves to communicate and help the other person with communication, discussion, and guidance. The person surrounding him feels very positive about his communication and guidance. He loves to help people in their difficult and confusing times with knowledge and experience. He is a firm believer that every problem comes with a solution and knows what and who needs the right guidance at the right time. Apart from Vedic astrology he also provides remedies and pujas for Vastu dosha."
   },
   {
     name: "Acharya Shivam",
-    expertise: ["Vedic"],
-    language: ["Hindi"],
-    experience: 18,
-    minRate: 22,
+    expertise: ["Vedic", "Horoscope Reading", "Marriage Matching", "Love Life"],
+    language: ["Hindi", "English"],
+    experience: 9,
+    minRate: 25,
     discountedRate: 15,
     imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Shivame.jpg",
-    rating: 5.0,
-    ratingCount: 121,
+    rating: 4.9,
+    ratingCount: 80,
     followers: 150,
     status: "online",
+    about: "Acharya Shivam With more than a decade of experience, Acharya Shivam is a professional astrologer who gained experience in Vedic astrology along with other key dimensions Horoscope reading,marriage, Match Making ,Career, wealth and Love. Famous Astrologer located at Delhi NCR. He is providing qualitative range of astrology services to the people. Complete the atsrological education from Bhartiya Vidhya Bhawan from delhi. And Shastri From Sampurnanad University. Acharya Shivam strongly believes that God has chosen a path for everyone and all of us can find our way in life if we choose the right path. He also relies on the truth that people cannot cancel an event but balance in elements can give us strength and power to deal with a situation. He guides people with the help of his practice in Vedic Astrology to make life easy. So if you are looking for a spiritual healer then get connected to Acharya Shivam."
   },
   {
-    name: "Acharya Madhusudan",
-    expertise: ["Muhurat", "Marriage Matching"],
-    language: ["Hindi"],
-    experience: 7,
+    name: "Acharya Prakash",
+    expertise: ["Vedic", "Love Life"],
+    language: ["Hindi", "English"],
+    experience: 6,
     minRate: 20,
-    discountedRate: 9,
+    discountedRate: 12,
+    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Madhusudane.jpg",
+    rating: 4.7,
+    ratingCount: 40,
+    followers: 75,
+    status: "online",
+    about: "Acharya Prakash Acharya Prakash has been associated with this field for a pretty long time. He has been doing the same and helping people since ages for a very long time. His expertise and proficiency has helped people get past their life problems solved within no time. There are a lot of clients whom he has served and they are all leading happy and successful lives now. With whatever he has said and predicted, they went on to turn out to be pretty accurate. This explains the huge client base he enjoys in the current time. Today, he is counted amongst one of the premium astrologers in town. he hopes to keep serving people like this for the rest of her life and make it easier for everyone as he believes that everyone is capable of being saved and deserves to lead a good life."
+  },
+  {
+    name: "Acharya Krishan Pandey",
+    expertise: ["Vedic", "Marriage Matching", "Love Life"],
+    language: ["Hindi", "English"],
+    experience: 4,
+    minRate: 22,
+    discountedRate: 15,
+    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Dinanath.jpeg",
+    rating: 4.6,
+    ratingCount: 30,
+    followers: 50,
+    status: "online",
+    about: "Acharya Krishan Pandey Acharya Krishan Pandeyis a highly experienced and knowledgeable astrologer with a focus on Vedic astrology. He has been practicing astrology for over half a decade and has helped countless individuals with his insightful and accurate predictions and guidance. Acharya Krishan Pandey passion for astrology began at a young age, and he has since dedicated his life to mastering the complexities of Vedic astrology. He has completed his formal education in astrology from a prestigious institution and has continued to expand his knowledge and expertise through ongoing study and practice. He deeply understands the planetary positions and their effects on different aspects of life, including career, finance, health, and relationships. So get in touch with Acharya Krishan Pandey sfor more information!"
+  },
+  {
+    name: "Acharya Bhaskar",
+    expertise: ["Vedic", "Marriage Matching", "Love Life"],
+    language: ["Hindi", "English"],
+    experience: 6,
+    minRate: 18,
+    discountedRate: 10,
+    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Aastha.jpg",
+    rating: 4.5,
+    ratingCount: 25,
+    followers: 60,
+    status: "online",
+    about: "Acharya Bhaskar The knowledgeable astrologer Acharya Bhaskar has devoted more than a half-decade of his life to the study and practice of astrology. He holds the title of Vedic Astrology master as a result of his devotion. He provides his services at the finest caliber possible. His clientele has rapidly grown in a short period of time. Acharya Bhaskar clients appreciate his services since he can address any of their inquiries. His economical yet effective remedies have also received praise and confidence from his patients. Contact Acharya Bhaskar for assistance if you need it to get over challenging circumstances or challenges. He is the one who has promised to support and guide them."
+  },
+  {
+    name: "Anupam Bharadwaj",
+    expertise: ["Vedic", "Marriage Matching", "Love Life"],
+    language: ["Hindi", "English"],
+    experience: 20,
+    minRate: 40,
+    discountedRate: 25,
     imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Madhusudane.jpg",
     rating: 5.0,
-    ratingCount: 160,
-    followers: 68,
+    ratingCount: 100,
+    followers: 200,
     status: "online",
+    about: "Anupam Bharadwaj Acharya Anupam Bharadwaj is a highly respected and accomplished Vedic astrologer with over two decades of experience in the field. His extensive knowledge and expertise in Vedic astrology have helped thousands of people gain insights and guidance on various aspects of their lives, including career, relationships, health, and spirituality. He has an exceptional ability to analyze complex birth charts and interpret the positions of the planets to predict future events. Throughout his career, Acharya Anupam Bharadwaj has gained a reputation for his professionalism, integrity, and compassion. He takes a client-focused approach to his work and is known for his ability to connect with his clients on a personal level. Contact Acharya Anupam Bharadwaj for more information!"
   },
   {
-    name: "Acharya Dinanath",
-    expertise: ["Marriage Matching", "Love Life"],
-    language: ["Hindi"],
-    experience: 12,
-    minRate: 30,
-    discountedRate: 9,
-    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya%20Dinanath.jpeg",
-    rating: 5.0,
-    ratingCount: 73,
-    followers: 2,
+    name: "Acharya Rahul",
+    expertise: ["Vedic", "Marriage Matching", "Love Life"],
+    language: ["Hindi", "English"],
+    experience: 6,
+    minRate: 25,
+    discountedRate: 15,
+    imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Arun%20(1).jpg",
+    rating: 4.9,
+    ratingCount: 45,
+    followers: 90,
     status: "online",
-  },
+    about: "Acharya Rahul Acharya Rahulis always ready to assist/gp-= anyone in need and has a lot of knowledge in astrology, including Vedic astrology. Acharya Rahul is a very reputated astrologer.He has change many peoples life through their accurate predictions and remedies.He have great knowledge of astrology.His specialization in Shadi, Career, Job & Business, Love & arrange marrige, Health with a experience of 6 years. He honestly thinks that planetary motions are essential to assisting us in finding answers to problems. His precise assessments and practical recommendations have helped many of his clients achieve their objectives. In addition, he contends that even while humans cannot stop an event from happening, a set of circumstances might endow us with the strength and capability to handle it. Acharya Rahul mentors people using his knowledge of the subject in an effort to make their lives easier."
+  }
 ];
 
 export const seedAstrologers = async () => {
@@ -219,17 +199,17 @@ export const seedAstrologers = async () => {
 
     const languageDocs = await Language.find();
     languageDocs.forEach((lang) => {
-      languagesMap[lang.value] = lang._id;  // Use _id for ObjectId
+      languagesMap[lang.value] = lang._id;
     });
 
     const expertiseDocs = await Expertise.find();
     expertiseDocs.forEach((exp) => {
-      expertisesMap[exp.value] = exp._id;  // Use _id for ObjectId
+      expertisesMap[exp.value] = exp._id;
     });
 
     const statusDocs = await Status.find();
     statusDocs.forEach((status) => {
-      statusMap[status.value] = status._id;  // Use _id for ObjectId
+      statusMap[status.value] = status._id;
     });
 
     const astrologersWithRefs = astrologers.map((astrologer) => ({
@@ -246,7 +226,6 @@ export const seedAstrologers = async () => {
     console.error("Error seeding astrologers:", error);
   }
 };
-
 const categories = [
   {
     name: "Agarbatti",
@@ -407,7 +386,7 @@ const banners = [
   {
     name: "PanditParmanand",
     imgLink:
-      "https://res.cloudinary.com/dguy5exjy/image/upload/t_first-banner/your-cloudinary-folder-name/kmdpam3frslvfj6imthb",
+      "https://res.cloudinary.com/dguy5exjy/image/upload/v1733844273/your-cloudinary-folder-name/l78uy0nmzwvfivbgnav2.png",
     active: true,
     sequenceNo: 1,
   },
