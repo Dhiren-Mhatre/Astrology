@@ -29,7 +29,7 @@ const Navbar = () => {
     }, []);
 
     return (
-        <nav className="bg-white shadow-md">
+        <nav className="bg-white z-10 shadow-md">
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 {/* StarPandit Logo with Custom Styling */}
                 <div 
