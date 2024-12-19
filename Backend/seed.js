@@ -386,7 +386,7 @@ const banners = [
   {
     name: "PanditParmanand",
     imgLink:
-      "https://res.cloudinary.com/dguy5exjy/image/upload/v1733844273/your-cloudinary-folder-name/l78uy0nmzwvfivbgnav2.png",
+      "https://res.cloudinary.com/dguy5exjy/image/upload/v1734595788/your-cloudinary-folder-name/suo15qj9ydzf3omivhex.png",
     active: true,
     sequenceNo: 1,
   },
