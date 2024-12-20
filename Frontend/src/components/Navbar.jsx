@@ -21,30 +21,39 @@ const Navbar = () => {
         const [showPassword, setShowPassword] = useState(false);
         const [phone, setPhone] = useState("");
         const [showOtpInput, setShowOtpInput] = useState(false);
+        const [isForgotPassword, setIsForgotPassword] = useState(false);
         const [otp, setOtp] = useState("");
         const [password, setPassword] = useState("");
         const [email, setEmail] = useState("");
         const [fullName, setFullName] = useState("");
         const [confirmPassword, setConfirmPassword] = useState("");
+        const [newPassword, setNewPassword] = useState("");
 
         useEffect(() => {
             return () => {
-                // Reset state on unmount
+                // Reset all state on unmount
                 setShowPassword(false);
                 setPhone("");
                 setShowOtpInput(false);
+                setIsForgotPassword(false);
                 setOtp("");
                 setPassword("");
                 setEmail("");
                 setFullName("");
                 setConfirmPassword("");
+                setNewPassword("");
             };
         }, []);
 
         const handleSendOTP = async (e) => {
             e?.preventDefault();
             
-            if (isLogin && (!phone || !password)) {
+            if (isForgotPassword && !phone) {
+                toast.warning("Please enter your phone number");
+                return;
+            }
+
+            if (isLogin && !isForgotPassword && (!phone || !password)) {
                 toast.warning("Please fill in all required fields");
                 return;
             }
@@ -72,13 +81,27 @@ const Navbar = () => {
             try {
                 const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
                 
-                // Verify OTP
-                await axios.post(`${backendUrl}/api/user/verify-otp`, {
-                    phoneNumber: formattedPhone,
-                    otp
-                });
+                if (isForgotPassword) {
+                    if (!newPassword || !confirmPassword || newPassword !== confirmPassword) {
+                        toast.error("Please enter matching passwords");
+                        return;
+                    }
+                    
+                    // Send both OTP and new password in the reset request
+                    await axios.post(`${backendUrl}/api/user/reset-password`, {
+                        phoneNumber: formattedPhone,
+                        otp, // Include the OTP
+                        newPassword
+                    });
+                    
+                    toast.success("Password reset successful! Please login with your new password.");
+                    setIsForgotPassword(false);
+                    setShowOtpInput(false);
+                    onClose(); // Close the modal
+                    setShowLoginModal(true); // Open login modal
+                    return;
+                }
 
-                // Handle login or registration based on mode
                 if (isLogin) {
                     const response = await axios.post(
                         `${backendUrl}/api/user/login`,
@@ -123,7 +146,7 @@ const Navbar = () => {
                 <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold">
-                            {isLogin ? "Welcome Back!" : "Create Account"}
+                            {isForgotPassword ? "Reset Password" : isLogin ? "Welcome Back!" : "Create Account"}
                         </h2>
                         <button
                             onClick={onClose}
@@ -135,9 +158,9 @@ const Navbar = () => {
 
                     <div className="space-y-4">
                         {!showOtpInput ? (
-                            // Login/Register Form
+                            // Initial Form (Login/Register/Forgot Password)
                             <form onSubmit={handleSendOTP} className="space-y-4">
-                                {!isLogin && (
+                                {!isLogin && !isForgotPassword && (
                                     <input
                                         type="text"
                                         placeholder="Full Name"
@@ -177,7 +200,7 @@ const Navbar = () => {
                                     />
                                 </div>
 
-                                {!isLogin && (
+                                {!isLogin && !isForgotPassword && (
                                     <input
                                         type="email"
                                         placeholder="Email (Optional)"
@@ -187,25 +210,27 @@ const Navbar = () => {
                                     />
                                 )}
 
-                                <div className="relative">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-3 text-xl cursor-pointer"
-                                    >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                    </button>
-                                </div>
+                                {!isForgotPassword && (
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-3 text-xl cursor-pointer"
+                                        >
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </button>
+                                    </div>
+                                )}
 
-                                {!isLogin && (
+                                {!isLogin && !isForgotPassword && (
                                     <div className="relative">
                                         <input
                                             type={showPassword ? "text" : "password"}
@@ -224,6 +249,26 @@ const Navbar = () => {
                                 >
                                     Get OTP
                                 </button>
+
+                                {isLogin && !isForgotPassword && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsForgotPassword(true)}
+                                        className="w-full text-indigo-600 text-sm hover:underline"
+                                    >
+                                        Forgot Password?
+                                    </button>
+                                )}
+
+                                {isForgotPassword && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsForgotPassword(false)}
+                                        className="w-full text-indigo-600 text-sm hover:underline"
+                                    >
+                                        Back to Login
+                                    </button>
+                                )}
                             </form>
                         ) : (
                             // OTP Verification Form
@@ -235,14 +280,49 @@ const Navbar = () => {
                                     onChange={(e) => setOtp(e.target.value)}
                                     className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                                 />
+
+                                {isForgotPassword && (
+                                    <>
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="New Password"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-3 text-xl cursor-pointer"
+                                            >
+                                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                            </button>
+                                        </div>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Confirm New Password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                        />
+                                    </>
+                                )}
+
                                 <button
                                     onClick={handleVerifyOTP}
                                     className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
                                 >
-                                    Verify & {isLogin ? "Login" : "Register"}
+                                    {isForgotPassword ? "Reset Password" : `Verify & ${isLogin ? "Login" : "Register"}`}
                                 </button>
+
                                 <button
-                                    onClick={() => setShowOtpInput(false)}
+                                    onClick={() => {
+                                        setShowOtpInput(false);
+                                        setOtp("");
+                                        setNewPassword("");
+                                        setConfirmPassword("");
+                                    }}
                                     className="w-full bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition duration-300"
                                 >
                                     Back
@@ -250,7 +330,7 @@ const Navbar = () => {
                             </div>
                         )}
 
-                        {!showOtpInput && (
+                        {!showOtpInput && !isForgotPassword && (
                             <p className="mt-4 text-center">
                                 {isLogin ? "Don't have an account? " : "Already have an account? "}
                                 <button

@@ -193,22 +193,32 @@ export const resetPassword = async (req, res) => {
   try {
     const { phoneNumber, otp, newPassword } = req.body;
     
-    // Verify OTP
+    if (!phoneNumber || !otp || !newPassword) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // First verify OTP
     const otpRecord = await OTP.findOne({ phoneNumber, otp });
     if (!otpRecord) {
       return res.status(400).json({ error: "Invalid OTP" });
     }
 
-    // Update password
+    // Find user and update password
     const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update password
     user.password = newPassword;
     await user.save();
 
-    // Delete OTP record
-    await OTP.deleteOne({ phoneNumber, otp });
+    // Delete OTP record after successful password reset
+    await OTP.deleteOne({ phoneNumber });
 
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
+    console.error("Reset password error:", error);
     res.status(500).json({ error: "Failed to reset password" });
   }
 };
