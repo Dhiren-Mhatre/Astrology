@@ -13,86 +13,108 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
+    
     const navigate = useNavigate();
 
     // Authentication Modal Component
     const AuthModal = ({ isLogin, onClose }) => {
-        // Separate state for each modal
         const [showPassword, setShowPassword] = useState(false);
         const [phone, setPhone] = useState("");
-        
-        // Reset states when modal closes
+        const [showOtpInput, setShowOtpInput] = useState(false);
+        const [otp, setOtp] = useState("");
+        const [password, setPassword] = useState("");
+        const [email, setEmail] = useState("");
+        const [fullName, setFullName] = useState("");
+        const [confirmPassword, setConfirmPassword] = useState("");
+
         useEffect(() => {
             return () => {
+                // Reset state on unmount
                 setShowPassword(false);
                 setPhone("");
+                setShowOtpInput(false);
+                setOtp("");
+                setPassword("");
+                setEmail("");
+                setFullName("");
+                setConfirmPassword("");
             };
         }, []);
 
-        const handleSubmit = async (e) => {
-            e.preventDefault();
+        const handleSendOTP = async (e) => {
+            e?.preventDefault();
             
-            if (isLogin) {
-                // Login Logic
-                const email = e.target.email.value;
-                const password = e.target.password.value;
+            if (isLogin && (!phone || !password)) {
+                toast.warning("Please fill in all required fields");
+                return;
+            }
 
-                if (email && password) {
-                    try {
-                        const response = await axios.post(
-                            `${backendUrl}/api/user/login`,
-                            { email, password }
-                        );
-                        const decodedToken = decodeJWT(response.data.token);
-                        const userId = decodedToken?.id;
+            if (!isLogin && (!phone || !password || !fullName || password !== confirmPassword)) {
+                toast.warning("Please fill in all required fields and ensure passwords match");
+                return;
+            }
 
-                        localStorage.setItem("authToken", JSON.stringify(response.data.token));
-                        localStorage.setItem("userId", userId);
-                        window.dispatchEvent(new Event("storage"));
+            try {
+                const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+                
+                await axios.post(`${backendUrl}/api/user/send-otp`, { 
+                    phoneNumber: formattedPhone 
+                });
+                
+                toast.success("OTP sent successfully! (Use 12345 for testing)");
+                setShowOtpInput(true);
+            } catch (err) {
+                toast.error(err.response?.data?.error || "Failed to send OTP");
+            }
+        };
+
+        const handleVerifyOTP = async () => {
+            try {
+                const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+                
+                // Verify OTP
+                await axios.post(`${backendUrl}/api/user/verify-otp`, {
+                    phoneNumber: formattedPhone,
+                    otp
+                });
+
+                // Handle login or registration based on mode
+                if (isLogin) {
+                    const response = await axios.post(
+                        `${backendUrl}/api/user/login`,
+                        { 
+                            phoneNumber: formattedPhone,
+                            password 
+                        }
+                    );
+
+                    if (response.data.token) {
+                        localStorage.setItem("authToken", response.data.token);
                         setIsLoggedIn(true);
                         onClose();
                         toast.success("Successfully logged in!");
-                    } catch (err) {
-                        if (err.response?.status === 400) {
-                            toast.error("Incorrect email or password");
-                        } else {
-                            toast.error("Login failed. Please try again.");
-                        }
                     }
                 } else {
-                    toast.warning("Please fill in all fields");
-                }
-            } else {
-                // Register Logic
-                const fullName = e.target.fullName.value;
-                const email = e.target.email.value;
-                const password = e.target.password.value;
-                const confirmPassword = e.target.confirmPassword.value;
+                    const response = await axios.post(
+                        `${backendUrl}/api/user/register`,
+                        {
+                            name: fullName,
+                            phoneNumber: formattedPhone,
+                            email: email || '',
+                            password
+                        }
+                    );
 
-                if (fullName && email && password && confirmPassword && phone) {
-                    if (password === confirmPassword) {
-                        try {
-                            await axios.post(
-                                `${backendUrl}/api/user/register`,
-                                {
-                                    name: fullName,
-                                    email,
-                                    phoneNumber: phone,
-                                    password,
-                                }
-                            );
-                            toast.success("Registration successful!");
-                            onClose();
-                            setShowLoginModal(true);
-                        } catch (err) {
-                            toast.error(err.response?.data?.error || "Registration failed");
-                        }
-                    } else {
-                        toast.error("Passwords don't match");
+                    if (response.data.token) {
+                        localStorage.setItem("authToken", response.data.token);
+                        setIsLoggedIn(true);
+                        onClose();
+                        toast.success("Registration successful!");
                     }
-                } else {
-                    toast.warning("Please fill in all fields");
                 }
+            } catch (err) {
+                console.error("Verification error:", err.response?.data);
+                toast.error(err.response?.data?.error || "Verification failed");
             }
         };
 
@@ -110,110 +132,144 @@ const Navbar = () => {
                             ✕
                         </button>
                     </div>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {!isLogin && (
-                            <input
-                                type="text"
-                                placeholder="Full Name"
-                                name="fullName"
-                                required
-                                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
-                            />
-                        )}
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            name="email"
-                            required
-                            className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
-                        />
-                        {!isLogin && (
-                            <div className="mb-4">
-                                <PhoneInput
-                                    country={"in"}
-                                    value={phone}
-                                    onChange={setPhone}
-                                    inputStyle={{
-                                        width: "100%",
-                                        height: "40px",
-                                        fontSize: "16px",
-                                        borderBottom: "2px solid #e5e7eb",
-                                        borderTop: "none",
-                                        borderLeft: "none",
-                                        borderRight: "none",
-                                        borderRadius: "0",
-                                    }}
-                                    dropdownStyle={{
-                                        zIndex: 999,
-                                    }}
-                                    containerStyle={{
-                                        width: "100%",
-                                    }}
-                                    buttonStyle={{
-                                        borderBottom: "2px solid #e5e7eb",
-                                        borderTop: "none",
-                                        borderLeft: "none",
-                                        borderRight: "none",
-                                        borderRadius: "0",
-                                        backgroundColor: "transparent",
-                                    }}
-                                    enableSearch={true}
-                                />
-                            </div>
-                        )}
-                        <div className="relative">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Password"
-                                name="password"
-                                required
-                                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-3 text-xl cursor-pointer"
-                            >
-                                {showPassword ? <FaEyeSlash /> : <FaEye />}
-                            </button>
-                        </div>
-                        {!isLogin && (
-                            <div className="relative">
+
+                    <div className="space-y-4">
+                        {!showOtpInput ? (
+                            // Login/Register Form
+                            <form onSubmit={handleSendOTP} className="space-y-4">
+                                {!isLogin && (
+                                    <input
+                                        type="text"
+                                        placeholder="Full Name"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        required
+                                        className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                    />
+                                )}
+                                
+                                <div className="mb-4">
+                                    <PhoneInput
+                                        country={"in"}
+                                        value={phone}
+                                        onChange={setPhone}
+                                        inputStyle={{
+                                            width: "100%",
+                                            height: "40px",
+                                            fontSize: "16px",
+                                            borderBottom: "2px solid #e5e7eb",
+                                            borderTop: "none",
+                                            borderLeft: "none",
+                                            borderRight: "none",
+                                            borderRadius: "0",
+                                        }}
+                                        dropdownStyle={{ zIndex: 999 }}
+                                        containerStyle={{ width: "100%" }}
+                                        buttonStyle={{
+                                            borderBottom: "2px solid #e5e7eb",
+                                            borderTop: "none",
+                                            borderLeft: "none",
+                                            borderRight: "none",
+                                            borderRadius: "0",
+                                            backgroundColor: "transparent",
+                                        }}
+                                        enableSearch={true}
+                                    />
+                                </div>
+
+                                {!isLogin && (
+                                    <input
+                                        type="email"
+                                        placeholder="Email (Optional)"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                    />
+                                )}
+
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-3 text-xl cursor-pointer"
+                                    >
+                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                    </button>
+                                </div>
+
+                                {!isLogin && (
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Confirm Password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                            className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                                        />
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
+                                >
+                                    Get OTP
+                                </button>
+                            </form>
+                        ) : (
+                            // OTP Verification Form
+                            <div className="space-y-4">
                                 <input
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Confirm Password"
-                                    name="confirmPassword"
-                                    required
+                                    type="text"
+                                    placeholder="Enter OTP"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
                                     className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                                 />
                                 <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-3 text-xl cursor-pointer"
+                                    onClick={handleVerifyOTP}
+                                    className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
                                 >
-                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                    Verify & {isLogin ? "Login" : "Register"}
+                                </button>
+                                <button
+                                    onClick={() => setShowOtpInput(false)}
+                                    className="w-full bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition duration-300"
+                                >
+                                    Back
                                 </button>
                             </div>
                         )}
-                        <button
-                            type="submit"
-                            className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
-                        >
-                            {isLogin ? "Log In" : "Sign Up"}
-                        </button>
-                    </form>
-                    <p className="mt-4 text-center">
-                        {isLogin ? "Don't have an account? " : "Already have an account? "}
-                        <button
-                            onClick={() => {
-                                onClose();
-                                isLogin ? setShowRegisterModal(true) : setShowLoginModal(true);
-                            }}
-                            className="text-indigo-600 font-semibold"
-                        >
-                            {isLogin ? "Sign Up" : "Log In"}
-                        </button>
-                    </p>
+
+                        {!showOtpInput && (
+                            <p className="mt-4 text-center">
+                                {isLogin ? "Don't have an account? " : "Already have an account? "}
+                                <button
+                                    onClick={() => {
+                                        if (isLogin) {
+                                            setShowLoginModal(false);
+                                            setShowRegisterModal(true);
+                                        } else {
+                                            setShowRegisterModal(false);
+                                            setShowLoginModal(true);
+                                        }
+                                    }}
+                                    className="text-indigo-600 font-semibold"
+                                >
+                                    {isLogin ? "Sign Up" : "Log In"}
+                                </button>
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -239,60 +295,45 @@ const Navbar = () => {
     const handleLogout = async () => {
         try {
             const token = localStorage.getItem("authToken");
-            if (!token) {
-                // Clean up local storage anyway
-                localStorage.removeItem("authToken");
-                localStorage.removeItem("userId");
-                setIsLoggedIn(false);
-                navigate("/");
-                return;
-            }
-    
-            // Parse token properly
-            const parsedToken = JSON.parse(token);
             
-            const response = await axios.post(
-                `${backendUrl}/api/user/logout`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${parsedToken}`
+            if (token) {
+                await axios.post(
+                    `${backendUrl}/api/user/logout`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
                     }
-                }
-            );
-    
-            // Clean up regardless of response
+                );
+            }
+
             localStorage.removeItem("authToken");
-            localStorage.removeItem("userId");
             setIsLoggedIn(false);
             navigate("/");
-            
-            if (response.status === 200) {
-                toast.success("Successfully logged out!");
-            }
+            toast.success("Successfully logged out!");
         } catch (error) {
             console.error("Logout failed:", error);
-            // Clean up anyway on error
             localStorage.removeItem("authToken");
-            localStorage.removeItem("userId");
             setIsLoggedIn(false);
             navigate("/");
-            toast.error("Logged out locally due to session error");
+            toast.error("Logged out due to session error");
         }
     };
 
 useEffect(() => {
-    const updateLoginStatus = () => {
         const token = localStorage.getItem("authToken");
         setIsLoggedIn(!!token);
-        // Add this debug log
-        console.log('Login status updated:', !!token);
-    };
-    
-    updateLoginStatus();
-    window.addEventListener("storage", updateLoginStatus);
-    return () => window.removeEventListener("storage", updateLoginStatus);
-}, []);
+
+        const handleStorageChange = (e) => {
+            if (e.key === "authToken") {
+                setIsLoggedIn(!!e.newValue);
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
 
     return (
         <>

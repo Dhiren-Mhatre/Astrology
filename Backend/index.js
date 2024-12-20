@@ -60,24 +60,39 @@ app.get("/", (req, res) => {
 
 // MongoDB connection with enhanced error handling
 const connectDB = async () => {
-    try {
-        mongoose.set("strictQuery", true);
-        await mongoose.connect(process.env.MONGO_URL, { 
-            dbName: "astrology",
-            // Additional connection options for better stability
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000
-        });
-        console.log("MongoDB connected successfully");
-    } catch (error) {
-        console.error("MongoDB connection failed:");
-        console.error(error);
-        // Exit process with failure
-        process.exit(1);
+    const MAX_RETRIES = 3;
+    let retryCount = 0;
+
+    while (retryCount < MAX_RETRIES) {
+        try {
+            console.log(`Attempting to connect to MongoDB (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+            
+            await mongoose.connect(process.env.MONGO_URL, {
+                dbName: "astrology",
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                serverSelectionTimeoutMS: 5000,
+                socketTimeoutMS: 45000,
+                family: 4 // Force IPv4
+            });
+
+            console.log("MongoDB connected successfully");
+            return;
+        } catch (error) {
+            retryCount++;
+            console.error(`MongoDB connection attempt ${retryCount} failed:`);
+            console.error(error);
+            
+            if (retryCount === MAX_RETRIES) {
+                console.error("Max retry attempts reached. Exiting...");
+                process.exit(1);
+            }
+            
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
     }
 };
-
 // Server startup function
 const startServer = async () => {
     try {

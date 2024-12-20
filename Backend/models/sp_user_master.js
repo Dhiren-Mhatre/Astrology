@@ -11,49 +11,47 @@ const UserSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, "Please provide email"],
       minlength: 3,
       maxlength: 50,
       match: [
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         "Please provide a valid email",
       ],
-      unique: true,
     },
     phoneNumber: {
       type: String,
       required: [true, "Please provide phone number"],
       minlength: 10,
       maxlength: 15,
+      unique: true,
     },
     password: {
       type: String,
       required: [true, "Please provide password"],
       minlength: 3,
     },
-    // Additional fields
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
     gender: {
       type: String,
       enum: ['male', 'female', 'other'],
-     
     },
     dateOfBirth: {
       type: Date,
-     
     },
     timeOfBirth: {
       type: String,
-       
     },
     birthPlace: {
       type: String,
-       
       maxlength: 100,
     }
   },
-  { 
-    collection: "sp_user_master", 
-    timestamps: true // Adds createdAt and updatedAt fields
+  {
+    collection: "sp_user_master",
+    timestamps: true
   }
 );
 
@@ -64,9 +62,27 @@ UserSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Define comparePassword as a method
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 export default mongoose.model("User", UserSchema);
+
+// OTP Model
+const OTPSchema = new mongoose.Schema({
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  otp: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 300 // OTP expires after 5 minutes
+  }
+});
+
+export const OTP = mongoose.model('OTP', OTPSchema);
