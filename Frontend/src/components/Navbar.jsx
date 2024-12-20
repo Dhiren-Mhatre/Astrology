@@ -236,58 +236,63 @@ const Navbar = () => {
         setIsOpen(!isOpen);
     };
 
-   // Update the handleLogout function to make the API call
-   const handleLogout = async () => {
-    try {
-        // Debug log to verify backend URL
-        console.log('Backend URL:', backendUrl);
-        
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            toast.error("No auth token found");
-            return;
-        }
-
-        const logoutUrl = `${backendUrl}/api/user/logout`;
-        console.log('Logout URL:', logoutUrl); // Debug log
-
-        const response = await axios.post(
-            logoutUrl,
-            {},
-            {
-                headers: {
-                    Authorization: `Bearer ${token.replace(/"/g, '')}`,
-                },
-                validateStatus: function (status) {
-                    return status < 500; // Handle all responses
-                }
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem("authToken");
+            if (!token) {
+                // Clean up local storage anyway
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userId");
+                setIsLoggedIn(false);
+                navigate("/");
+                return;
             }
-        );
-
-        if (response.status === 200) {
+    
+            // Parse token properly
+            const parsedToken = JSON.parse(token);
+            
+            const response = await axios.post(
+                `${backendUrl}/api/user/logout`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${parsedToken}`
+                    }
+                }
+            );
+    
+            // Clean up regardless of response
             localStorage.removeItem("authToken");
             localStorage.removeItem("userId");
             setIsLoggedIn(false);
             navigate("/");
-            toast.success("Successfully logged out!");
-        } else {
-            throw new Error(response.data.msg || 'Logout failed');
+            
+            if (response.status === 200) {
+                toast.success("Successfully logged out!");
+            }
+        } catch (error) {
+            console.error("Logout failed:", error);
+            // Clean up anyway on error
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("userId");
+            setIsLoggedIn(false);
+            navigate("/");
+            toast.error("Logged out locally due to session error");
         }
-    } catch (error) {
-        console.error("Logout failed details:", {
-            url: `${backendUrl}/api/user/logout`,
-            error: error.response || error
-        });
-        toast.error(error.response?.data?.msg || "Logout failed. Please try again.");
-    }
-};
+    };
 
-    useEffect(() => {
-        const updateLoginStatus = () => setIsLoggedIn(!!localStorage.getItem("authToken"));
-        updateLoginStatus();
-        window.addEventListener("storage", updateLoginStatus);
-        return () => window.removeEventListener("storage", updateLoginStatus);
-    }, []);
+useEffect(() => {
+    const updateLoginStatus = () => {
+        const token = localStorage.getItem("authToken");
+        setIsLoggedIn(!!token);
+        // Add this debug log
+        console.log('Login status updated:', !!token);
+    };
+    
+    updateLoginStatus();
+    window.addEventListener("storage", updateLoginStatus);
+    return () => window.removeEventListener("storage", updateLoginStatus);
+}, []);
 
     return (
         <>

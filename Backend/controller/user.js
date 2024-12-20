@@ -58,35 +58,26 @@ export const login = async (req, res) => {
 // New logout endpoint to properly track logout events
 // Update the logout endpoint with better error handling and logging
 export const logout = async (req, res) => {
-  try {
-      const token = extractToken(req.headers.authorization);
-      if (!token) {
-          return res.status(400).json({ msg: "No token provided" });
-      }
+    try {
+        const token = extractToken(req.headers.authorization);
+        if (!token) {
+            return res.status(200).json({ msg: "Logged out successfully" });
+        }
 
-      // Add logging
-      console.log('Attempting to log out with token:', token);
+        try {
+            // Try to update login history
+            await UserLoginHistory.updateLogoutTime(token);
+        } catch (error) {
+            console.error("Error updating login history:", error);
+            // Continue with logout even if history update fails
+        }
 
-      // Record logout in history with improved error handling
-      const updatedRecord = await UserLoginHistory.updateLogoutTime(token);
-      
-      if (!updatedRecord) {
-          console.log('No login record found for token:', token);
-          return res.status(404).json({ msg: "No active session found" });
-      }
-
-      console.log('Successfully logged out. Updated record:', updatedRecord);
-      return res.status(200).json({ 
-          msg: "Successfully logged out",
-          logoutTime: updatedRecord.logoutTime 
-      });
-  } catch (error) {
-      console.error("Logout error:", error);
-      return res.status(500).json({ 
-          msg: "Server error during logout",
-          error: error.message 
-      });
-  }
+        return res.status(200).json({ msg: "Successfully logged out" });
+    } catch (error) {
+        console.error("Logout error:", error);
+        // Still return success to client
+        return res.status(200).json({ msg: "Logged out successfully" });
+    }
 };
 // Middleware to handle forced logouts (token expiration)
 export const handleTokenExpiration = async (req, res, next) => {
