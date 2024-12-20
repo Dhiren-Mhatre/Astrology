@@ -26,9 +26,9 @@ const callSchema = new mongoose.Schema({
   },
 }, { 
   timestamps: true, 
-  collection: "sp_call_master" 
+  collection: "sp_call_history",
 });
 
-const Call = mongoose.model("sp_call_master", callSchema);
+const Call = mongoose.model("sp_call_history", callSchema);
 export default Call;
   

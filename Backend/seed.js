@@ -3,7 +3,8 @@ import Category from "./models/sp_category_master.js"; // Adjust the path accord
 import dotenv from "dotenv";
 import Astrologer from "./models/sp_astrologer_master.js";
 import Banner from "./models/sp_banner_master.js";
- 
+import Click2CallConfig from "./models/sp_click2call_config_master.js";
+
  
  
 import Language from "./models/sp_language_master.js";
@@ -21,6 +22,17 @@ dotenv.config();
 //   }
 // };
 
+export const seedClick2CallConfig = async () => {
+  try {
+      const existingConfig = await Click2CallConfig.findOne();
+      if (!existingConfig) {
+          await Click2CallConfig.create({});
+          console.log("Click2Call configuration seeded successfully");
+      }
+  } catch (error) {
+      console.error("Error seeding Click2Call configuration:", error);
+  }
+};
 
 const languages = [
   { id: 1, value: "English" },
@@ -82,7 +94,7 @@ export const seedCollections = async () => {
     
     await Status.deleteMany();
     const insertedStatuses = await Status.insertMany(statuses);
-
+    await seedClick2CallConfig();
     console.log("Languages, Expertises, and Statuses seeded successfully");
   } catch (error) {
     console.error("Error seeding data:", error);

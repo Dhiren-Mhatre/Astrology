@@ -1,119 +1,190 @@
 import jwt from "jsonwebtoken";
-import User from "../models/sp_user_master.js"; // Ensure the correct path to your User model
+import User from "../models/sp_user_master.js";
+import UserLoginHistory from "../models/sp_user_login_history.js";
 import dotenv from 'dotenv';
 dotenv.config();
- 
+
+// Helper function to extract token from authorization header
+const extractToken = (authHeader) => {
+    if (!authHeader) return null;
+    const parts = authHeader.split(' ');
+    return parts.length === 2 && parts[0] === 'Bearer' ? parts[1] : null;
+};
+
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({
-      msg: "Bad request. Please add email and password in the request body",
-    });
-  }
-
-  const foundUser = await User.findOne({ email });
-  if (foundUser) {
-    const isMatch = await foundUser.comparePassword(password);
-
-    if (isMatch) {
-      const token = jwt.sign(
-        { id: foundUser._id, name: foundUser.name },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "30d",
-        }
-      );
-
-      return res.status(200).json({ msg: "User logged in", token });
-    } else {
-       
-      return res.status(400).json({ msg: "Bad password" });
+    if (!email || !password) {
+        return res.status(400).json({
+            msg: "Bad request. Please add email and password in the request body",
+        });
     }
-  } else {
-    return res.status(400).json({ msg: "Bad credentials" });
+
+    try {
+        const foundUser = await User.findOne({ email });
+        if (foundUser) {
+            const isMatch = await foundUser.comparePassword(password);
+
+            if (isMatch) {
+                // Generate JWT token
+                const token = jwt.sign(
+                    { id: foundUser._id, name: foundUser.name },
+                    process.env.JWT_SECRET,
+                    { expiresIn: "1d" }
+                );
+
+                // Record login history
+                await UserLoginHistory.createLoginRecord(email, token, {
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent'],
+                    deviceType: req.headers['user-agent'] ? 
+                        (req.headers['user-agent'].includes('Mobile') ? 'mobile' : 'desktop') 
+                        : 'unknown'
+                });
+
+                return res.status(200).json({ msg: "User logged in", token });
+            } else {
+                return res.status(400).json({ msg: "Bad password" });
+            }
+        } else {
+            return res.status(400).json({ msg: "Bad credentials" });
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        return res.status(500).json({ msg: "Server error during login" });
+    }
+};
+
+// New logout endpoint to properly track logout events
+// Update the logout endpoint with better error handling and logging
+export const logout = async (req, res) => {
+  try {
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+          return res.status(400).json({ msg: "No token provided" });
+      }
+
+      // Add logging
+      console.log('Attempting to log out with token:', token);
+
+      // Record logout in history with improved error handling
+      const updatedRecord = await UserLoginHistory.updateLogoutTime(token);
+      
+      if (!updatedRecord) {
+          console.log('No login record found for token:', token);
+          return res.status(404).json({ msg: "No active session found" });
+      }
+
+      console.log('Successfully logged out. Updated record:', updatedRecord);
+      return res.status(200).json({ 
+          msg: "Successfully logged out",
+          logoutTime: updatedRecord.logoutTime 
+      });
+  } catch (error) {
+      console.error("Logout error:", error);
+      return res.status(500).json({ 
+          msg: "Server error during logout",
+          error: error.message 
+      });
   }
+};
+// Middleware to handle forced logouts (token expiration)
+export const handleTokenExpiration = async (req, res, next) => {
+    try {
+        const token = extractToken(req.headers.authorization);
+        if (!token) return next();
+
+        // Verify token and check expiration
+        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+            if (err && err.name === 'TokenExpiredError') {
+                // Record forced logout due to token expiration
+                await UserLoginHistory.updateLogoutTime(token, true);
+            }
+        });
+        next();
+    } catch (error) {
+        console.error("Token expiration handling error:", error);
+        next();
+    }
 };
 
 export const getUserById = async (req, res) => {
-  try {
-    const { userId } = req.params; // Get user ID from URL parameters
+    try {
+        const { userId } = req.params;
+        const user = await User.findById(userId);
 
-    // Find the user by their ID
-    const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
     }
-
-    // Return the user details
-    res.status(200).json({ user });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
 };
 
-
 export const getAllUsers = async (req, res) => {
-  const users = await User.find({});
-  return res.status(200).json({ users });
+    const users = await User.find({});
+    return res.status(200).json({ users });
 };
 
 export const register = async (req, res) => {
-  
-  const { name, email, phoneNumber, password } = req.body;
-  if (!name || !email || !phoneNumber || !password) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-  console.log(req.body)
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+    const { name, email, phoneNumber, password } = req.body;
+    if (!name || !email || !phoneNumber || !password) {
+        return res.status(400).json({ error: "All fields are required" });
     }
 
-    const newUser = new User({
-      name,
-      email,
-      phoneNumber,
-      password,
-    });
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: "User already exists" });
+        }
 
-    await newUser.save();
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    res.status(201).json({ message: "User registered successfully", token });
-  } catch (error) {
-    console.error("Error during registration:", error.message);
-    res.status(500).json({ error: "Server error" });
-  }
+        const newUser = new User({
+            name,
+            email,
+            phoneNumber,
+            password,
+        });
+
+        await newUser.save();
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+            expiresIn: "1d",
+        });
+
+        // Record initial login after registration
+        await UserLoginHistory.createLoginRecord(email, token, {
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent'],
+            deviceType: req.headers['user-agent'] ? 
+                (req.headers['user-agent'].includes('Mobile') ? 'mobile' : 'desktop') 
+                : 'unknown'
+        });
+
+        res.status(201).json({ message: "User registered successfully", token });
+    } catch (error) {
+        console.error("Error during registration:", error.message);
+        res.status(500).json({ error: "Server error" });
+    }
 };
 
 export const updateProfile = async (req, res) => {
-  try {
-    const { userId } = req.params; // Assumes user ID is passed in the URL
-    const updateFields = req.body; // Capture all fields from the request body
+    try {
+        const { userId } = req.params;
+        const updateFields = req.body;
 
-    // Example authorization check (assuming JWT-based authentication)
-    // const userFromToken = req.user; // Assuming the decoded user from the token is in req.user
-    // if (userFromToken.id !== userId) {
-    //   return res.status(403).json({ message: 'Not authorized to update this profile' });
-    // }
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            updateFields,
+            { new: true, runValidators: true }
+        );
 
-    // Update user profile with dynamic fields
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      updateFields,
-      { new: true, runValidators: true } // Options to return the updated document and run validators
-    );
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+        res.status(200).json({ message: 'Profile updated successfully', updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-
-    res.status(200).json({ message: 'Profile updated successfully', updatedUser });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
 };
