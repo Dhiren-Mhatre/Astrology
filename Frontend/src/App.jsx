@@ -5,8 +5,8 @@ import Navbar from "./components/Navbar";
 import Categories from "./pages/Categories";
 import Astrologers from "./pages/AstrologerList";
 import Footer from "./components/Footer";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./components/Login";
+import Register from "./components/Register";
 import Logout from "./pages/Logout";
 import AboutAstrologer from "./pages/AboutAstrologer";
 function App() {
