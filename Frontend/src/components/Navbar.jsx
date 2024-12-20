@@ -237,29 +237,48 @@ const Navbar = () => {
     };
 
    // Update the handleLogout function to make the API call
-const handleLogout = async () => {
+   const handleLogout = async () => {
     try {
+        // Debug log to verify backend URL
+        console.log('Backend URL:', backendUrl);
+        
         const token = localStorage.getItem("authToken");
-        if (token) {
-            await axios.post(
-                `${backendUrl}/api/user/logout`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${JSON.parse(token)}`
-                    }
+        if (!token) {
+            toast.error("No auth token found");
+            return;
+        }
+
+        const logoutUrl = `${backendUrl}/api/user/logout`;
+        console.log('Logout URL:', logoutUrl); // Debug log
+
+        const response = await axios.post(
+            logoutUrl,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token.replace(/"/g, '')}`,
+                },
+                validateStatus: function (status) {
+                    return status < 500; // Handle all responses
                 }
-            );
-            
+            }
+        );
+
+        if (response.status === 200) {
             localStorage.removeItem("authToken");
             localStorage.removeItem("userId");
             setIsLoggedIn(false);
             navigate("/");
             toast.success("Successfully logged out!");
+        } else {
+            throw new Error(response.data.msg || 'Logout failed');
         }
     } catch (error) {
-        console.error("Logout failed:", error);
-        toast.error("Logout failed. Please try again.");
+        console.error("Logout failed details:", {
+            url: `${backendUrl}/api/user/logout`,
+            error: error.response || error
+        });
+        toast.error(error.response?.data?.msg || "Logout failed. Please try again.");
     }
 };
 
