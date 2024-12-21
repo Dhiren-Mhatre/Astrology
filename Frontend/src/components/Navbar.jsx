@@ -28,7 +28,8 @@ const Navbar = () => {
         const [fullName, setFullName] = useState("");
         const [confirmPassword, setConfirmPassword] = useState("");
         const [newPassword, setNewPassword] = useState("");
-
+        const [transactionId, setTransactionId] = useState("");
+    
         useEffect(() => {
             return () => {
                 // Reset all state on unmount
@@ -42,9 +43,10 @@ const Navbar = () => {
                 setFullName("");
                 setConfirmPassword("");
                 setNewPassword("");
+                setTransactionId("");
             };
         }, []);
-
+    
         const handleSendOTP = async (e) => {
             e?.preventDefault();
             
@@ -52,95 +54,175 @@ const Navbar = () => {
                 toast.warning("Please enter your phone number");
                 return;
             }
-
+            
             if (isLogin && !isForgotPassword && (!phone || !password)) {
                 toast.warning("Please fill in all required fields");
                 return;
             }
-
-            if (!isLogin && (!phone || !password || !fullName || password !== confirmPassword)) {
+        
+            if (!isLogin && !isForgotPassword && (!phone || !password || !fullName || password !== confirmPassword)) {
                 toast.warning("Please fill in all required fields and ensure passwords match");
                 return;
             }
-
-            try {
-                const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
-                
-                await axios.post(`${backendUrl}/api/user/send-otp`, { 
-                    phoneNumber: formattedPhone 
-                });
-                
-                toast.success("OTP sent successfully! (Use 12345 for testing)");
-                setShowOtpInput(true);
-            } catch (err) {
-                toast.error(err.response?.data?.error || "Failed to send OTP");
-            }
-        };
-
-        const handleVerifyOTP = async () => {
+        
             try {
                 const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
                 
                 if (isForgotPassword) {
-                    if (!newPassword || !confirmPassword || newPassword !== confirmPassword) {
+                    // For forgot password, use the forgot-password endpoint
+                    const forgotResponse = await axios.post(`${backendUrl}/api/user/forgot-password`, {
+                        phoneNumber: formattedPhone
+                    });
+                    
+                    if (forgotResponse.data.transactionId) {
+                        setTransactionId(forgotResponse.data.transactionId);
+                        if (forgotResponse.data.otp) {
+                            toast.success(`OTP sent successfully! OTP: ${forgotResponse.data.otp}`);
+                        } else {
+                            toast.success("OTP sent successfully!");
+                        }
+                        setShowOtpInput(true);
+                    }
+                } else {
+                    // For login/register flow
+                    if (isLogin && !isForgotPassword) {
+                        const validateResponse = await axios.post(`${backendUrl}/api/user/login`, {
+                            phoneNumber: formattedPhone,
+                            password
+                        });
+                        
+                        if (!validateResponse.data) {
+                            toast.error("Invalid credentials");
+                            return;
+                        }
+                    }
+                    
+                    const response = await axios.post(`${backendUrl}/api/user/send-otp`, { 
+                        phoneNumber: formattedPhone 
+                    });
+                    
+                    if (response.data.transactionId) {
+                        setTransactionId(response.data.transactionId);
+                        if (response.data.otp) {
+                            toast.success(`OTP sent successfully! OTP: ${response.data.otp}`);
+                        } else {
+                            toast.success("OTP sent successfully!");
+                        }
+                        setShowOtpInput(true);
+                    }
+                }
+            } catch (err) {
+                console.error("Send OTP error:", err.response?.data);
+                toast.error(err.response?.data?.error || "Failed to send OTP");
+            }
+        };
+    
+        const handleVerifyOTP = async () => {
+            try {
+                const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+                
+                if (!otp || !transactionId) {
+                    toast.error("Please enter OTP");
+                    return;
+                }
+    
+                if (isForgotPassword) {
+                    // Handle password reset
+                    if (!newPassword || newPassword !== confirmPassword) {
                         toast.error("Please enter matching passwords");
                         return;
                     }
-                    
-                    // Send both OTP and new password in the reset request
-                    await axios.post(`${backendUrl}/api/user/reset-password`, {
-                        phoneNumber: formattedPhone,
-                        otp, // Include the OTP
-                        newPassword
-                    });
-                    
-                    toast.success("Password reset successful! Please login with your new password.");
-                    setIsForgotPassword(false);
-                    setShowOtpInput(false);
-                    onClose(); // Close the modal
-                    setShowLoginModal(true); // Open login modal
+    
+                    try {
+                        const resetResponse = await axios.put(
+                            `${backendUrl}/api/user/reset-password`,
+                            {
+                                phoneNumber: formattedPhone,
+                                otp,
+                                transactionId,
+                                newPassword
+                            }
+                        );
+    
+                        if (resetResponse.data.success) {
+                            toast.success("Password reset successful!");
+                            onClose();
+                            // Optionally, switch back to login modal
+                            setShowLoginModal(true);
+                        }
+                    } catch (resetError) {
+                        console.error("Password reset error:", resetError.response?.data);
+                        toast.error(resetError.response?.data?.error || "Failed to reset password");
+                    }
                     return;
                 }
-
-                if (isLogin) {
-                    const response = await axios.post(
-                        `${backendUrl}/api/user/login`,
-                        { 
-                            phoneNumber: formattedPhone,
-                            password 
-                        }
-                    );
-
-                    if (response.data.token) {
-                        localStorage.setItem("authToken", response.data.token);
-                        setIsLoggedIn(true);
-                        onClose();
-                        toast.success("Successfully logged in!");
+    
+                // Handle login/register verification
+                // Rest of your existing verification logic...
+                const verifyResponse = await axios.post(
+                    `${backendUrl}/api/user/verify-otp`,
+                    {
+                        phoneNumber: formattedPhone,
+                        otp,
+                        transactionId
                     }
-                } else {
-                    const response = await axios.post(
+                );
+    
+                if (!verifyResponse.data.success) {
+                    toast.error("OTP verification failed");
+                    return;
+                }
+    
+                if (!isLogin) {
+                    // Registration flow
+                    if (!fullName || !password || password !== confirmPassword) {
+                        toast.error("Please fill all required fields and ensure passwords match");
+                        return;
+                    }
+    
+                    const registerResponse = await axios.post(
                         `${backendUrl}/api/user/register`,
                         {
                             name: fullName,
                             phoneNumber: formattedPhone,
-                            email: email || '',
+                            password,
+                            email: email || undefined,
+                            otp,
+                            transactionId
+                        }
+                    );
+    
+                    if (registerResponse.data.token) {
+                        localStorage.setItem('authToken', registerResponse.data.token);
+                        localStorage.setItem('userId', registerResponse.data.userId);
+                        setIsLoggedIn(true);
+                        toast.success("Registration successful!");
+                        onClose();
+                    }
+                } else {
+                    // Login flow
+                    const loginResponse = await axios.post(
+                        `${backendUrl}/api/user/login`,
+                        {
+                            phoneNumber: formattedPhone,
                             password
                         }
                     );
-
-                    if (response.data.token) {
-                        localStorage.setItem("authToken", response.data.token);
+                    
+                    if (loginResponse.data.token && loginResponse.data.userId) {
+                        localStorage.setItem('authToken', loginResponse.data.token);
+                        localStorage.setItem('userId', loginResponse.data.userId);
                         setIsLoggedIn(true);
+                        toast.success("Login successful!");
                         onClose();
-                        toast.success("Registration successful!");
                     }
                 }
             } catch (err) {
-                console.error("Verification error:", err.response?.data);
-                toast.error(err.response?.data?.error || "Verification failed");
+                console.error("Verification error:", err);
+                toast.error(err.response?.data?.error || "An unexpected error occurred");
             }
         };
-
+    
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
                 <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -155,7 +237,7 @@ const Navbar = () => {
                             ✕
                         </button>
                     </div>
-
+    
                     <div className="space-y-4">
                         {!showOtpInput ? (
                             // Initial Form (Login/Register/Forgot Password)
@@ -199,8 +281,8 @@ const Navbar = () => {
                                         enableSearch={true}
                                     />
                                 </div>
-
-                                {!isLogin && !isForgotPassword && (
+    
+                                {!isForgotPassword && !isLogin && (
                                     <input
                                         type="email"
                                         placeholder="Email (Optional)"
@@ -209,7 +291,7 @@ const Navbar = () => {
                                         className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                                     />
                                 )}
-
+    
                                 {!isForgotPassword && (
                                     <div className="relative">
                                         <input
@@ -229,7 +311,7 @@ const Navbar = () => {
                                         </button>
                                     </div>
                                 )}
-
+    
                                 {!isLogin && !isForgotPassword && (
                                     <div className="relative">
                                         <input
@@ -242,14 +324,14 @@ const Navbar = () => {
                                         />
                                     </div>
                                 )}
-
+    
                                 <button
                                     type="submit"
                                     className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
                                 >
                                     Get OTP
                                 </button>
-
+    
                                 {isLogin && !isForgotPassword && (
                                     <button
                                         type="button"
@@ -259,7 +341,7 @@ const Navbar = () => {
                                         Forgot Password?
                                     </button>
                                 )}
-
+    
                                 {isForgotPassword && (
                                     <button
                                         type="button"
@@ -280,7 +362,7 @@ const Navbar = () => {
                                     onChange={(e) => setOtp(e.target.value)}
                                     className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                                 />
-
+    
                                 {isForgotPassword && (
                                     <>
                                         <div className="relative">
@@ -308,14 +390,14 @@ const Navbar = () => {
                                         />
                                     </>
                                 )}
-
+    
                                 <button
                                     onClick={handleVerifyOTP}
                                     className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
                                 >
                                     {isForgotPassword ? "Reset Password" : `Verify & ${isLogin ? "Login" : "Register"}`}
                                 </button>
-
+    
                                 <button
                                     onClick={() => {
                                         setShowOtpInput(false);
@@ -329,7 +411,7 @@ const Navbar = () => {
                                 </button>
                             </div>
                         )}
-
+    
                         {!showOtpInput && !isForgotPassword && (
                             <p className="mt-4 text-center">
                                 {isLogin ? "Don't have an account? " : "Already have an account? "}

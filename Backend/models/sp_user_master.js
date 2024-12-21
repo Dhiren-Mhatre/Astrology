@@ -17,6 +17,11 @@ const UserSchema = new mongoose.Schema(
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         "Please provide a valid email",
       ],
+      validate: {
+        validator: function(v) {
+          return v === undefined || v === null || v.length > 0;
+        }
+      }
     },
     phoneNumber: {
       type: String,
@@ -61,14 +66,16 @@ UserSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
+UserSchema.index({ email: 1 }, { sparse: true });
 
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 export default mongoose.model("User", UserSchema);
+ 
 
-// OTP Model
+// Update OTP Schema
 const OTPSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
@@ -78,11 +85,38 @@ const OTPSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  transactionId: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'verified', 'expired'],
+    default: 'pending'
+  },
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 300 // OTP expires after 5 minutes
+    expires: undefined // Remove TTL
+  }
+}, {
+  collection: 'otp',
+  timestamps: true,
+  capped: false // Ensure collection is not capped
+});
+
+// Drop existing TTL index if exists
+mongoose.connection.on('connected', async () => {
+  try {
+    await mongoose.connection.db.collection('otp').dropIndex('createdAt_1');
+  } catch (err) {
+    // Index might not exist, ignore error
   }
 });
 
+// Add regular indexes without TTL
+OTPSchema.index({ transactionId: 1 });
+OTPSchema.index({ phoneNumber: 1 });
+OTPSchema.index({ status: 1 });
 export const OTP = mongoose.model('OTP', OTPSchema);

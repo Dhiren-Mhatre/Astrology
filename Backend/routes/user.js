@@ -10,6 +10,7 @@ import {
     sendOTP,
     verifyOTP,
     forgotPassword,
+    checkUser,
     resetPassword
 } from "../controller/user.js";
 
@@ -25,11 +26,11 @@ router.post("/register", register);
 router.post("/send-otp", sendOTP);
 router.post("/verify-otp", verifyOTP);
 router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.put("/reset-password", resetPassword);
 
 // User management routes
 router.get("/users", getAllUsers);
 router.get("/user/:userId", getUserById);
 router.put('/updateProfile/:userId', updateProfile);
-
+router.post('/check-user', checkUser);
 export default router;

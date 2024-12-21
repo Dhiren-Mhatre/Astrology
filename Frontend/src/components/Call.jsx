@@ -211,44 +211,33 @@ const BirthDetailsPopup = ({
             </select>
           </div>
 
-          <div>
-            <label className="block mb-2">Date of Birth</label>
-            <input
-              type="text"
-              pattern="\d{2}\d{2}\d{4}"
-              placeholder="DD/MM/YYYY"
-              name="birthDate"
-              value={userDetails.birthDate || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Allow only numbers and format as user types
-                const numbersOnly = value.replace(/\D/g, "");
-                let formattedDate = numbersOnly;
-
-                if (numbersOnly.length > 2 && numbersOnly.length <= 4) {
-                  formattedDate = `${numbersOnly.slice(
-                    0,
-                    2
-                  )}/${numbersOnly.slice(2)}`;
-                } else if (numbersOnly.length > 4) {
-                  formattedDate = `${numbersOnly.slice(
-                    0,
-                    2
-                  )}/${numbersOnly.slice(2, 4)}/${numbersOnly.slice(4, 8)}`;
-                }
-
-                handleInputChange({
-                  target: {
-                    name: "birthDate",
-                    value: formattedDate,
-                  },
-                });
-              }}
-              maxLength="10"
-              className="form-control"
-              required
-            />
-          </div>
+           
+<div>
+    <label className="block mb-2">Date of Birth</label>
+    <input
+        type="date"
+        name="dateOfBirth"
+        value={userDetails.dateOfBirth ? userDetails.dateOfBirth.split('/').reverse().join('-') : ''}
+        onChange={(e) => {
+            const date = new Date(e.target.value);
+            const formattedDate = date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            
+            handleInputChange({
+                target: {
+                    name: "dateOfBirth",
+                    value: formattedDate
+                },
+            });
+        }}
+        max={new Date().toISOString().split('T')[0]}
+        className="w-full p-2 border rounded"
+        required
+    />
+</div>
 
           <div>
             <label className="block mb-2">Time of Birth </label>
@@ -335,9 +324,15 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
     birthPlace: "",
   });
   const [showBirthDetailsPopup, setShowBirthDetailsPopup] = useState(false);
-
   const isUserLoggedIn = () => {
-    return localStorage.getItem("authToken") !== null;
+    const token = localStorage.getItem("authToken");
+    const userId = localStorage.getItem("userId");
+    
+    if (!token || !userId) {
+      console.log("Missing credentials:", { token: !!token, userId: !!userId });
+      return false;
+    }
+    return true;
   };
 
   const handleInputChange = (e) => {
@@ -349,15 +344,22 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
   };
 
   const checkUserDetailsFromBackend = async () => {
-    const authToken = localStorage.getItem("authToken");
-    const userId = localStorage.getItem("userId");
-
-    if (!authToken || !userId) {
-      console.log("No auth token or user ID found");
-      return false;
-    }
-
     try {
+      if (!isUserLoggedIn()) {
+        toast.error("Please log in to continue");
+        return false;
+      }
+
+      const authToken = localStorage.getItem("authToken");
+      const userId = localStorage.getItem("userId");
+
+      console.log("Making API call with:", { userId, authToken: !!authToken });
+
+      if (!userId) {
+        toast.error("User ID not found. Please log in again.");
+        return false;
+      }
+
       const response = await axios.get(
         `${backendUrl}/api/user/user/${userId}`,
         {
@@ -368,78 +370,89 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
       );
 
       const user = response.data.user;
-      console.log("DETAILED User Details:", JSON.stringify(user, null, 2));
-
-      const requiredFields = [
-        "gender",
-        "dateOfBirth",
-        "timeOfBirth",
-        "birthPlace",
-      ];
-
-      const isDetailsComplete = requiredFields.every(
-        (field) =>
-          user[field] !== undefined &&
-          user[field] !== null &&
-          user[field].toString().trim() !== ""
-      );
-
-      console.log("IS Details Complete?", isDetailsComplete);
-
-      if (!isDetailsComplete) {
-        console.log("User details incomplete", user);
+      
+      if (!user) {
+        toast.error("User details not found");
         return false;
       }
 
-      // Update local state
+      const requiredFields = ["gender", "dateOfBirth", "timeOfBirth", "birthPlace"];
+      const missingFields = requiredFields.filter(
+        field => !user[field] || user[field].toString().trim() === ""
+      );
+
+      if (missingFields.length > 0) {
+        console.log("Missing fields:", missingFields);
+        setUserDetails(prevDetails => ({
+          ...prevDetails,
+          ...Object.fromEntries(
+            requiredFields.map(field => [field, user[field] || ""])
+          )
+        }));
+        return false;
+      }
+
       setUserDetails({
         gender: user.gender,
-        dateOfBirth: user.dateOfBirth
-          ? new Date(user.dateOfBirth).toISOString().split("T")[0]
-          : "",
+        dateOfBirth: user.dateOfBirth,
         timeOfBirth: user.timeOfBirth,
         birthPlace: user.birthPlace,
       });
 
       return true;
     } catch (error) {
-      console.error("Error in fetching user details:", error);
+      console.error("Error fetching user details:", error);
+      
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please log in again.");
+        // Optional: Clear localStorage and redirect to login
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userId");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to fetch user details");
+      }
+      
       return false;
     }
   };
-
   const updateUserDetails = async () => {
     const authToken = localStorage.getItem("authToken");
     const userId = localStorage.getItem("userId");
 
+    if (!authToken || !userId) {
+      toast.error("Authentication required. Please log in again.");
+      return false;
+    }
+
     try {
+      const formattedDate = new Date(userDetails.dateOfBirth.split('/').reverse().join('-'));
+      
+      const updateData = {
+        gender: userDetails.gender,
+        dateOfBirth: formattedDate.toISOString(),
+        timeOfBirth: userDetails.timeOfBirth,
+        birthPlace: userDetails.birthPlace,
+      };
+
       const response = await axios.put(
         `${backendUrl}/api/user/updateProfile/${userId}`,
+        updateData,
         {
-          gender: userDetails.gender,
-          dateOfBirth: userDetails.dateOfBirth,
-          timeOfBirth: userDetails.timeOfBirth,
-          birthPlace: userDetails.birthPlace,
-        },
-        { headers: { Authorization: `Bearer ${authToken}` } }
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
       if (response.status === 200) {
-        localStorage.setItem("userDetails", JSON.stringify(userDetails));
-        const user = response.data;
-        console.log("updated user details:", user);
-        setShowBirthDetailsPopup(false);
-        console.log("Details updated successfully!");
+        toast.success("Profile updated successfully!");
         return true;
       }
+      return false;
     } catch (error) {
-      console.error(
-        "Error updating user details:",
-        error.response?.data || error.message
-      );
-      toast.error(
-        error.response?.data?.message || "Failed to update user details"
-      );
+      console.error("Error updating user details:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
       return false;
     }
   };
@@ -450,9 +463,6 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
       return;
     }
 
-    const userId = localStorage.getItem("userId");
-    const authToken = localStorage.getItem("authToken");
-
     const isUserDetailsComplete = await checkUserDetailsFromBackend();
 
     if (!isUserDetailsComplete) {
@@ -460,39 +470,86 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
       return;
     }
 
+    const userId = localStorage.getItem("userId");
+    const authToken = localStorage.getItem("authToken");
+
+    if (!userId || !authToken) {
+      toast.error("Session expired. Please log in again.");
+      return;
+    }
+
     await initiateCall(userId, authToken);
   };
 
   const initiateCall = async (userId, authToken) => {
-    const callDetails = {
-      user_id: userId,
-      astrologer_id: astrologerId,
-      date_of_call: new Date().toISOString(),
-      call_duration: 0,
-      flag_free_paid_call: "free",
-    };
-
     try {
-      await axios.post(`${backendUrl}/api/calls`, callDetails, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      // Verify both IDs are present
+      console.log('Initiating call with:', { astrologerId, userId, authToken });
 
-      const supportPhoneNumber = "+918800774985";
-      window.location.href = `tel:${supportPhoneNumber}`;
+    // Verify both IDs are present
+    if (!userId || !authToken || !astrologerId) {
+      throw new Error("Missing required credentials");
+    }
+
+    const astrologerResponse = await axios.get(
+      `${backendUrl}/api/astrologer/${astrologerId}`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` }
+      }
+    );
+
+    // Add logging
+    console.log('Astrologer response:', astrologerResponse.data);
+      
+      const userResponse = await axios.get(
+        `${backendUrl}/api/user/user/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` }
+        }
+      );
+
+      const astrologerPhone = astrologerResponse.data.contactNumber?.toString();
+      const userPhone = userResponse.data.user.phoneNumber;
+
+      if (!astrologerPhone || !userPhone) {
+        throw new Error("Required phone numbers not found");
+      }
+
+      const response = await axios.post(
+        `${backendUrl}/api/click2call/initiate`,
+        {
+          customerNumber: userPhone,
+          astrologerNumber: astrologerPhone
+        },
+        {
+          headers: { Authorization: `Bearer ${authToken}` }
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Call initiated successfully!");
+      } else {
+        throw new Error("Failed to initiate call");
+      }
     } catch (error) {
-      console.error("Error logging the call:", error);
-      toast.error("Error logging the call.");
+      console.error("Error initiating call:", error);
+      toast.error(error.response?.data?.message || "Error initiating call");
     }
   };
 
   const handleBirthDetailsSubmit = async (e) => {
     e.preventDefault();
-    console.log("User details before update:", userDetails);
+    
+    if (!isUserLoggedIn()) {
+      toast.error("Please login to continue");
+      return;
+    }
+
     const updated = await updateUserDetails();
 
     if (updated) {
-      const authToken = localStorage.getItem("authToken");
       const userId = localStorage.getItem("userId");
+      const authToken = localStorage.getItem("authToken");
       await initiateCall(userId, authToken);
       setShowBirthDetailsPopup(false);
     }
@@ -502,10 +559,7 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
     <>
       <button
         onClick={handleCallInitiation}
-        className={
-          className ||
-          "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        }
+        className={className || "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"}
       >
         Call
       </button>
