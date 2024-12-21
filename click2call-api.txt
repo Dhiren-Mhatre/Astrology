@@ -1,6 +1,6 @@
 https://indiavoice.rpdigitalphone.com/api/click_to_call_v2?calling_party_a=<customer_number>&calling_party_b=<astrolger_number>&deskphone=<deskphone>&authcode=719b511f91b3c25ccf4871ce684e069d&call_from_did=1&waittime=30&calling_party_a_type=customer&CallLimit=60&uid=
 
-authcode should be in config db------------719b511f91b3c25ccf4871ce684e069
+authcode should be in config db------------719b511f91b3c25ccf4871ce684e069d
 calllimit should be in config db------------------60
 deskphone should be in config db------------------00917316835977
 call_from_did should be in config db-------------------1

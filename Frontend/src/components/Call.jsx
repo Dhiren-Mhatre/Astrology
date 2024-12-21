@@ -323,6 +323,8 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
     timeOfBirth: "",
     birthPlace: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState(null);
   const [showBirthDetailsPopup, setShowBirthDetailsPopup] = useState(false);
   const isUserLoggedIn = () => {
     const token = localStorage.getItem("authToken");
@@ -456,6 +458,18 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
       return false;
     }
   };
+  const formatPhoneNumber = (phoneNumber) => {
+    // Remove any spaces, hyphens, or plus signs
+    let cleaned = phoneNumber.replace(/[\s\-\+]/g, '');
+    
+    // Ensure number starts with 91
+    if (!cleaned.startsWith('91')) {
+      cleaned = '91' + cleaned;
+    }
+    
+    return cleaned;
+  };
+
 
   const handleCallInitiation = async () => {
     if (!isUserLoggedIn()) {
@@ -480,26 +494,18 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
 
     await initiateCall(userId, authToken);
   };
-
   const initiateCall = async (userId, authToken) => {
+    setIsLoading(true);
+    setDebugInfo(null);
+    
     try {
-      // Verify both IDs are present
-      console.log('Initiating call with:', { astrologerId, userId, authToken });
-
-    // Verify both IDs are present
-    if (!userId || !authToken || !astrologerId) {
-      throw new Error("Missing required credentials");
-    }
-
-    const astrologerResponse = await axios.get(
-      `${backendUrl}/api/astrologer/${astrologerId}`,
-      {
-        headers: { Authorization: `Bearer ${authToken}` }
-      }
-    );
-
-    // Add logging
-    console.log('Astrologer response:', astrologerResponse.data);
+      // 1. Get astrologer and user details
+      const astrologerResponse = await axios.get(
+        `${backendUrl}/api/astrologer/${astrologerId}`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` }
+        }
+      );
       
       const userResponse = await axios.get(
         `${backendUrl}/api/user/user/${userId}`,
@@ -508,13 +514,24 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         }
       );
 
-      const astrologerPhone = astrologerResponse.data.contactNumber?.toString();
-      const userPhone = userResponse.data.user.phoneNumber;
+      let astrologerPhone = astrologerResponse.data.contactNumber?.toString();
+      let userPhone = userResponse.data.user.phoneNumber;
+
+      // Format both phone numbers
+      astrologerPhone = formatPhoneNumber(astrologerPhone);
+      userPhone = formatPhoneNumber(userPhone);
+
+      // Log the formatted phone numbers
+      console.log('Formatted phone numbers:', {
+        astrologer: astrologerPhone,
+        user: userPhone
+      });
 
       if (!astrologerPhone || !userPhone) {
-        throw new Error("Required phone numbers not found");
+        throw new Error(`Missing phone numbers. Astrologer: ${!!astrologerPhone}, User: ${!!userPhone}`);
       }
 
+      // 2. Make the click2call API request
       const response = await axios.post(
         `${backendUrl}/api/click2call/initiate`,
         {
@@ -526,44 +543,66 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         }
       );
 
+      // Store debug info
+      setDebugInfo({
+        astrologerPhone,
+        userPhone,
+        apiResponse: response.data
+      });
+
+      // 3. Check the response
       if (response.data.success) {
-        toast.success("Call initiated successfully!");
+        if (response.data.data?.error) {
+          throw new Error(`Click2Call API Error: ${response.data.data.error}`);
+        }
+        
+        if (response.data.data?.type === 'success') {
+          toast.success("Call initiated successfully! Please wait for the call.");
+        } else {
+          toast.warning("Call initiated but status unclear. Please wait for the call.");
+        }
       } else {
-        throw new Error("Failed to initiate call");
+        throw new Error("Failed to initiate call - API returned success: false");
       }
+
     } catch (error) {
-      console.error("Error initiating call:", error);
-      toast.error(error.response?.data?.message || "Error initiating call");
+      console.error("Detailed call error:", error);
+      
+      let errorMessage = "Error initiating call. ";
+      if (error.response?.data?.message) {
+        errorMessage += error.response.data.message;
+      } else if (error.message) {
+        errorMessage += error.message;
+      }
+      
+      toast.error(errorMessage);
+      
+      setDebugInfo({
+        error: error.message,
+        response: error.response?.data,
+        stack: error.stack
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleBirthDetailsSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!isUserLoggedIn()) {
-      toast.error("Please login to continue");
-      return;
-    }
 
-    const updated = await updateUserDetails();
-
-    if (updated) {
-      const userId = localStorage.getItem("userId");
-      const authToken = localStorage.getItem("authToken");
-      await initiateCall(userId, authToken);
-      setShowBirthDetailsPopup(false);
-    }
-  };
 
   return (
     <>
-      <button
-        onClick={handleCallInitiation}
+       <button
+        onClick={() => handleCallInitiation()}
+        disabled={isLoading}
         className={className || "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"}
       >
-        Call
+        {isLoading ? 'Initiating Call...' : 'Call'}
       </button>
 
+      {/* Debug info panel - can be removed in production */}
+      {debugInfo && (
+        console.log(debugInfo)
+      )}
       {showBirthDetailsPopup && (
         <BirthDetailsPopup
           userDetails={userDetails}
