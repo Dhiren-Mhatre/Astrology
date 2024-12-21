@@ -561,6 +561,10 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         } else {
           toast.warning("Call initiated but status unclear. Please wait for the call.");
         }
+          // Redirect to the call URL
+          if (response.data.redirectUrl) {
+            window.location.href = response.data.redirectUrl;
+          }
       } else {
         throw new Error("Failed to initiate call - API returned success: false");
       }
