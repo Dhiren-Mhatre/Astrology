@@ -511,7 +511,7 @@ useEffect(() => {
                     <div className="hidden md:flex space-x-6 items-center">
                         <button onClick={() => navigate("/")} className="text-gray-700 hover:text-purple-600 transition-colors">Home</button>
                         <button onClick={() => navigate("/about")} className="text-gray-700 hover:text-purple-600 transition-colors">About</button>
-                        <button onClick={() => navigate("/shopify")} className="text-gray-700 hover:text-purple-600 transition-colors">Shopify</button>
+                       
                         <button onClick={() => navigate("/astrology-consultation")} className="text-gray-700 hover:text-purple-600 transition-colors">Astrology Consultation</button>
                         
                         {isLoggedIn ? (
