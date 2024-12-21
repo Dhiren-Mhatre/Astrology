@@ -107,6 +107,7 @@ const astrologers = [
     language: ["Hindi", "English"],
     experience: 8,
     minRate: 30, 
+    contactNumber: 919359502953,
     discountedRate: 20, 
     imgLink: "https://astrology.mangalbhawan.com/public/images/Acharya-Nitesh-Tripathi-.jpg", 
     rating: 4.8,

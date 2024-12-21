@@ -14,22 +14,29 @@ export const getConfig = async (req, res) => {
         });
     }
 };
-export const initiateClick2Call = async (req, res) => {
-    try {
-      const { customerNumber, astrologerNumber } = req.body;
-      
-      const now = new Date();
-      const uid = now.getFullYear().toString().slice(-2) + 
-                  (now.getMonth() + 1).toString().padStart(2, '0') +
-                  now.getDate().toString().padStart(2, '0') +
-                  now.getHours().toString().padStart(2, '0') +
-                  now.getMinutes().toString().padStart(2, '0') +
-                  now.getSeconds().toString().padStart(2, '0') +
-                  now.getMilliseconds().toString().padStart(3, '0') +
-                  customerNumber;
+const removeCountryCode = (number) => {
+    return number.replace(/^\+?91/, '');
+  };
   
-      const config = await Click2CallConfig.getConfig();
-      
+  export const initiateClick2Call = async (req, res) => {
+      try {
+        const { customerNumber, astrologerNumber } = req.body;
+        
+        // Clean number for UID
+        const cleanNumber = removeCountryCode(customerNumber);
+        
+        const now = new Date();
+        const uid = now.getFullYear().toString().slice(-2) + 
+                    (now.getMonth() + 1).toString().padStart(2, '0') +
+                    now.getDate().toString().padStart(2, '0') +
+                    now.getHours().toString().padStart(2, '0') +
+                    now.getMinutes().toString().padStart(2, '0') +
+                    now.getSeconds().toString().padStart(2, '0') +
+                    now.getMilliseconds().toString().padStart(3, '0') +
+                    cleanNumber;
+    
+        const config = await Click2CallConfig.getConfig();
+        
       const apiUrl = `https://indiavoice.rpdigitalphone.com/api/click_to_call_v2?calling_party_a=${customerNumber}&calling_party_b=${astrologerNumber}&deskphone=${config.deskphone}&authcode=${config.authcode}&call_from_did=${config.call_from_did}&waittime=${config.waittime}&calling_party_a_type=customer&CallLimit=${config.calllimit}&uid=${uid}`;
   
       const response = await fetch(apiUrl);

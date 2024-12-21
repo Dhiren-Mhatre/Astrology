@@ -611,7 +611,7 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         <BirthDetailsPopup
           userDetails={userDetails}
           handleInputChange={handleInputChange}
-          handleSubmit={handleBirthDetailsSubmit}
+          handleSubmit={updateUserDetails}
           onClose={() => setShowBirthDetailsPopup(false)}
         />
       )}
