@@ -49,17 +49,25 @@ const Navbar = () => {
             };
         }, []);
           // Add useEffect for countdown
-  useEffect(() => {
-    let timer;
-    if (showOtpInput && countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown(prev => prev - 1);
-      }, 1000);
-    } else if (countdown === 0) {
-      setCanResendOTP(true);
-    }
-    return () => clearInterval(timer);
-  }, [countdown, showOtpInput]);
+          useEffect(() => {
+            let timer;
+            if (showOtpInput && countdown > 0) {
+                setCanResendOTP(false); // Ensure resend is disabled when countdown starts
+                timer = setInterval(() => {
+                    setCountdown(prev => {
+                        if (prev <= 1) {
+                            setCanResendOTP(true);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            }
+            
+            return () => {
+                if (timer) clearInterval(timer);
+            };
+        }, [countdown, showOtpInput]);
 
         const handleSendOTP = async (e) => {
             e?.preventDefault();
@@ -123,18 +131,15 @@ const Navbar = () => {
                     
                     if (response.data.transactionId) {
                         setTransactionId(response.data.transactionId);
+                        setCountdown(30);
+                        setCanResendOTP(false); // Explicitly disable resend when new OTP is sent
+                        setShowOtpInput(true);
+                        
                         if (response.data.otp) {
-                            setCountdown(30);
-                            setCanResendOTP(false);
-                            setShowOtpInput(true);
                             toast.success(`OTP sent successfully! OTP: ${response.data.otp}`);
                         } else {
-                            setCountdown(30);
-                            setCanResendOTP(false);
-                            setShowOtpInput(true);
                             toast.success("OTP sent successfully!");
                         }
-                        setShowOtpInput(true);
                     }
                 }
             } catch (err) {
@@ -387,18 +392,28 @@ const Navbar = () => {
                             <div className="space-y-4">
                       {showOtpInput && (
         <div>
-          <input
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
-          <button
-            onClick={handleSendOTP}
-            isDisabled={!canResendOTP}
-            mt={2}
-          >
-            {canResendOTP ? 'Resend OTP' : `Resend OTP in ${countdown}s`}
-          </button>
+              <div className="flex flex-col space-y-4">
+            <input
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
+                maxLength={6}
+            />
+            
+            <button
+                onClick={handleSendOTP}
+                disabled={!canResendOTP}
+                className={`w-full py-2 rounded-md transition duration-300 ${
+                    canResendOTP 
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+            >
+                {canResendOTP ? 'Resend OTP' : `Resend OTP in ${countdown}s`}
+            </button>
+        </div>
         </div>
       )}
     

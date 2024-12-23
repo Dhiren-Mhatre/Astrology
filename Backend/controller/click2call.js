@@ -15,13 +15,19 @@ export const getConfig = async (req, res) => {
     }
 };
 const removeCountryCode = (number) => {
-    return number.replace(/^\+?91/, '');
+    // Remove any non-digit characters first
+    number = number.replace(/\D/g, '');
+    // Remove leading 91 or any other country code patterns
+    number = number.replace(/^91|^\+91/, '');
+    return number;
   };
   
   export const initiateClick2Call = async (req, res) => {
       try {
         const { customerNumber, astrologerNumber } = req.body;
-        
+        const cleanCustomerNumber = removeCountryCode(customerNumber);
+    const cleanAstrologerNumber = removeCountryCode(astrologerNumber);
+    
         // Clean number for UID
         const cleanNumber = removeCountryCode(customerNumber);
         
@@ -37,7 +43,7 @@ const removeCountryCode = (number) => {
     
         const config = await Click2CallConfig.getConfig();
         
-      const apiUrl = `https://indiavoice.rpdigitalphone.com/api/click_to_call_v2?calling_party_a=${customerNumber}&calling_party_b=${astrologerNumber}&deskphone=${config.deskphone}&authcode=${config.authcode}&call_from_did=${config.call_from_did}&waittime=${config.waittime}&calling_party_a_type=customer&CallLimit=${config.calllimit}&uid=${uid}`;
+      const apiUrl = `https://indiavoice.rpdigitalphone.com/api/click_to_call_v2?calling_party_a=${cleanCustomerNumber}&calling_party_b=${cleanAstrologerNumber}&deskphone=${config.deskphone}&authcode=${config.authcode}&call_from_did=${config.call_from_did}&waittime=${config.waittime}&calling_party_a_type=customer&CallLimit=${config.calllimit}&uid=${uid}`;
   
       const response = await fetch(apiUrl);
       const data = await response.json();

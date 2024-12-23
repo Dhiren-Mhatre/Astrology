@@ -580,6 +580,7 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         }
           // Redirect to the call URL
           if (response.data.redirectUrl) {
+            console.log("Redirect URL:", response.data.redirectUrl);
             hitApiWithoutRedirect(response.data.redirectUrl);
           }
       } else {
