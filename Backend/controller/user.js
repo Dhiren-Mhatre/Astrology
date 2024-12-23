@@ -88,6 +88,12 @@ export const checkUser = async (req, res) => {
 };
 export const login = async (req, res) => {
   const { phoneNumber, password } = req.body;
+  const user = await User.findOne({ phoneNumber });
+  if (!user) {
+    return res.status(404).json({ 
+      error: "Invalid user. Please register first." 
+    });
+  }
 
   if (!phoneNumber || !password) {
     return res.status(400).json({

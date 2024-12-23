@@ -29,7 +29,9 @@ const Navbar = () => {
         const [confirmPassword, setConfirmPassword] = useState("");
         const [newPassword, setNewPassword] = useState("");
         const [transactionId, setTransactionId] = useState("");
-    
+        const [countdown, setCountdown] = useState(30);
+        const [canResendOTP, setCanResendOTP] = useState(false);
+        
         useEffect(() => {
             return () => {
                 // Reset all state on unmount
@@ -46,7 +48,19 @@ const Navbar = () => {
                 setTransactionId("");
             };
         }, []);
-    
+          // Add useEffect for countdown
+  useEffect(() => {
+    let timer;
+    if (showOtpInput && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      setCanResendOTP(true);
+    }
+    return () => clearInterval(timer);
+  }, [countdown, showOtpInput]);
+
         const handleSendOTP = async (e) => {
             e?.preventDefault();
             
@@ -77,8 +91,14 @@ const Navbar = () => {
                     if (forgotResponse.data.transactionId) {
                         setTransactionId(forgotResponse.data.transactionId);
                         if (forgotResponse.data.otp) {
+                            setCountdown(30);
+                            setCanResendOTP(false);
+                            setShowOtpInput(true);
                             toast.success(`OTP sent successfully! OTP: ${forgotResponse.data.otp}`);
                         } else {
+                            setCountdown(30);
+                            setCanResendOTP(false);
+                            setShowOtpInput(true);
                             toast.success("OTP sent successfully!");
                         }
                         setShowOtpInput(true);
@@ -104,8 +124,14 @@ const Navbar = () => {
                     if (response.data.transactionId) {
                         setTransactionId(response.data.transactionId);
                         if (response.data.otp) {
+                            setCountdown(30);
+                            setCanResendOTP(false);
+                            setShowOtpInput(true);
                             toast.success(`OTP sent successfully! OTP: ${response.data.otp}`);
                         } else {
+                            setCountdown(30);
+                            setCanResendOTP(false);
+                            setShowOtpInput(true);
                             toast.success("OTP sent successfully!");
                         }
                         setShowOtpInput(true);
@@ -145,10 +171,14 @@ const Navbar = () => {
                         );
     
                         if (resetResponse.data.success) {
-                            toast.success("Password reset successful!");
+                            toast.success("Password reset successful! Please login.");
+                            setIsForgotPassword(false);
                             onClose();
-                            // Optionally, switch back to login modal
-                            setShowLoginModal(true);
+                            // Reopen modal in login view after a short delay
+                            setTimeout(() => {
+                              setShowLoginModal(true);
+                            }, 500);
+                            return;
                         }
                     } catch (resetError) {
                         console.error("Password reset error:", resetError.response?.data);
@@ -355,13 +385,22 @@ const Navbar = () => {
                         ) : (
                             // OTP Verification Form
                             <div className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="Enter OTP"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    className="w-full px-4 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500"
-                                />
+                      {showOtpInput && (
+        <div>
+          <input
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+          <button
+            onClick={handleSendOTP}
+            isDisabled={!canResendOTP}
+            mt={2}
+          >
+            {canResendOTP ? 'Resend OTP' : `Resend OTP in ${countdown}s`}
+          </button>
+        </div>
+      )}
     
                                 {isForgotPassword && (
                                     <>

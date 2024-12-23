@@ -447,8 +447,9 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         }
       );
 
-      if (response.status === 200) {
+      if (response.data.success) {
         toast.success("Profile updated successfully!");
+        onClose(); // Close the popup
         return true;
       }
       return false;
@@ -493,6 +494,22 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
     }
 
     await initiateCall(userId, authToken);
+  };
+  const hitApiWithoutRedirect = (url) => {
+    // Create temporary iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  
+    // Remove iframe after load
+    iframe.onload = () => {
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+    };
+  
+    // Load URL
+    iframe.src = url;
   };
   const initiateCall = async (userId, authToken) => {
     setIsLoading(true);
@@ -563,7 +580,7 @@ export default function CallComponent({ astrologerId, backendUrl, className }) {
         }
           // Redirect to the call URL
           if (response.data.redirectUrl) {
-            window.location.href = response.data.redirectUrl;
+            hitApiWithoutRedirect(response.data.redirectUrl);
           }
       } else {
         throw new Error("Failed to initiate call - API returned success: false");
