@@ -91,7 +91,7 @@ export const login = async (req, res) => {
   const user = await User.findOne({ phoneNumber });
   if (!user) {
     return res.status(404).json({ 
-      error: "Invalid user. Please register first." 
+      error: "Invalid user." 
     });
   }
 
