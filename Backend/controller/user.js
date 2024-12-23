@@ -91,7 +91,7 @@ export const login = async (req, res) => {
   const user = await User.findOne({ phoneNumber });
   if (!user) {
     return res.status(404).json({ 
-      error: "Invalid user." 
+      error: "Invalid user/Credentials." 
     });
   }
 
@@ -213,7 +213,7 @@ export const forgotPassword = async (req, res) => {
     // First check if user exists
     const user = await User.findOne({ phoneNumber });
     if (!user) {
-      return res.status(404).json({ error: "No account found with this phone number" });
+      return res.status(404).json({ error:"Invalid user" });
     }
 
     // Generate new OTP and transactionId
